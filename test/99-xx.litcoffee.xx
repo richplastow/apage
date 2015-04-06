@@ -1,0 +1,32 @@
+Xx Xx
+=====
+
+Xx. 
+
+
+    tudor.page    "Xx Xx"
+
+    tudor.section "Xx Xx"
+
+    tudor.is [
+
+      -> new Xx
+
+      "Xx"
+      'xx'
+      (mock) -> mock
+
+
+    ]
+
+    tudor.equal [
+
+      "Xx"
+      'xx'
+      (mock) -> mock
+
+
+    ]
+
+
+

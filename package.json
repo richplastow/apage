@@ -1,0 +1,36 @@
+{
+  "name": "apage",
+  "version": "0.0.2",
+  "license": "MIT",
+  "homepage": "http://apage.richplastow.com/",
+  "author": "Rich Plastow <rich@richplastow.com> (http://richplastow.com/)",
+  "description": "Generate a page from lots of markdown",
+  "main": "build/apage.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/richplastow/apage.git"
+  },
+  "keywords": [
+    "markdown",
+    "html",
+    "concatenate",
+    "single",
+    "page",
+    "doc",
+    "documentation",
+    "generator",
+    "coffeescript",
+    "litcoffee"
+  ],
+  "devDependencies": {
+    "coffee-script": "latest",
+    "nodemon": "latest"
+  },
+  "scripts": {
+    "test": "node test/run-test.js",
+    "build": "cat src/*.litcoffee | coffee --stdio --literate --compile > build/apage.js",
+    "watch": "nodemon -x \"cat src/*.litcoffee test/*.litcoffee | coffee -slc > build/test/apage-with-test.js\" -e litcoffee -w src -w test",
+    "v:list": "grep -ron $npm_package_version * | awk 1 ORS=' ' | sed \"s@:$npm_package_version@@g\"",
+    "v:open": "subl $(npm run v:list --loglevel silent)"
+  }
+}

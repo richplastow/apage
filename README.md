@@ -1,4 +1,4 @@
-Apage 0.0.1
+Apage 0.0.2
 ===========
 
 #### Apage generates a single HTML page from multiple markdown sources. 
