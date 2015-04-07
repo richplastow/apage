@@ -1,6 +1,7 @@
 {
   "name": "apage",
-  "version": "0.0.2",
+  "title": "Apage",
+  "version": "0.0.3",
   "license": "MIT",
   "homepage": "http://apage.richplastow.com/",
   "author": "Rich Plastow <rich@richplastow.com> (http://richplastow.com/)",
@@ -28,9 +29,11 @@
   },
   "scripts": {
     "test": "node test/run-test.js",
-    "build": "cat src/*.litcoffee | coffee --stdio --literate --compile > build/apage.js",
-    "watch": "nodemon -x \"cat src/*.litcoffee test/*.litcoffee | coffee -slc > build/test/apage-with-test.js\" -e litcoffee -w src -w test",
+    "source": "npm run v:head --loglevel silent | cat - node_modules/akaybe/src/*.litcoffee src/*.litcoffee",
+    "build": "npm run source --loglevel silent | coffee --stdio --literate --compile > build/apage.js",
+    "watch": "nodemon -x \"npm run source --loglevel silent | cat - test/*.litcoffee | coffee -slc > build/test/apage-with-test.js\" -e litcoffee -w src -w test",
     "v:list": "grep -ron $npm_package_version * | awk 1 ORS=' ' | sed \"s@:$npm_package_version@@g\"",
-    "v:open": "subl $(npm run v:list --loglevel silent)"
+    "v:open": "subl $(npm run v:list --loglevel silent)",
+    "v:head": "echo \"    ###! $npm_package_title $npm_package_version //// $npm_package_license Licence //// $npm_package_homepage ###\\n    I = '$npm_package_title'\\n    V = '$npm_package_version'\\n\""
   }
 }
