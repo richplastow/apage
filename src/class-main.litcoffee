@@ -14,6 +14,7 @@ is set to the module’s identifier `I` (defined in ‘akaybe-helpers.litcoffee�
 
     class Main
       I: I
+      V: V
       toString: -> "[object #{@I}]"
 
 
@@ -31,6 +32,7 @@ See `ª.populate()` for a description of the `rule` format.
       _rules:
         config: [
           ['title','Untitled','string',/^[^\x00-\x1F]{1,24}$/]
+          ['content','','string',/^[^\x00-\x08\x0E-\x1F]*$/]
         ]
 
 
@@ -103,11 +105,23 @@ invalid the whole operation fails. The `a` configuration remains unchanged.
 
 
 
+#### `appendContent()`
+Adds content to the end of the existing content. 
+
+      appendContent: (content) ->
+        content = @_c.content + content
+        if errors = ª.populate { content:content }, @_c, @_rules.config, yes #@todo test the `updating` arg
+          throw new Error 'Invalid `content`:\n  ' + errors.join '\n  '
+        @ # allow chaining
+
+
+
+
 #### `render()`
 Returns the html page, based on the current configuration. 
 
       render: ->
-        header @_c # defined in ‘static-main.litcoffee’
+        "#{header @_c}\n#{@_c.content}\n</body>\n</html>\n"
 
 
 

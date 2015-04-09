@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Documentation</title>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+  <style>
+    /* normalize.css v3.0.3 | MIT License | github.com/necolas/normalize.css */
+
+    /* Document */
+    html { font-family:sans-serif; -ms-text-size-adjust:100%; -webkit-text-size-adjust:100% }
+    body { margin:0 }
+
+    /* HTML5 */
+    article,aside,details,figcaption,figure,footer,header,hgroup,main,menu,nav,
+    section,summary { display: block }
+    audio,canvas,progress,video { display:inline-block; vertical-align:baseline }
+    audio:not([controls]) { display:none; height:0 }
+    [hidden],template { display:none }
+
+    /* Links */
+    a { background-color:transparent }
+    a:active,a:hover { outline:0 }
+
+    /* Text */
+    abbr[title] { border-bottom: 1px dotted }
+    b, strong { font-weight: bold }
+    dfn { font-style: italic }
+    h1 { font-size: 2em; margin: 0.67em 0 }
+    mark { background: #ff0; color: #000 }
+    small { font-size: 80% }
+    sub,sup { font-size:75%; line-height:0; position:relative; vertical-align:baseline }
+    sup { top: -0.5em }
+    sub { bottom: -0.25em }
+
+    /* Embedded */
+    img { border: 0 }
+    svg:not(:root) { overflow: hidden }
+
+    /* Grouping */
+    figure { margin: 1em 40px }
+    hr { box-sizing: content-box; height: 0 }
+    pre { overflow: auto }
+    code,kbd,pre,samp { font-family:monospace,monospace; font-size:1em }
+
+    /* Forms */
+    button,input,optgroup,select,textarea { color:inherit; font:inherit; margin:0 }
+    button { overflow:visible }
+    button,select { text-transform:none }
+    button,html input[type="button"],input[type="reset"],
+    input[type="submit"] { -webkit-appearance:button; cursor:pointer }
+    button[disabled],html input[disabled] { cursor:default }
+    button::-moz-focus-inner,input::-moz-focus-inner{ border:0; padding:0 }
+    input { line-height:normal }
+    input[type="checkbox"],input[type="radio"] { box-sizing:border-box; padding:0 }
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button { height:auto }
+    input[type="search"] { -webkit-appearance:textfield; box-sizing:content-box }
+    input[type="search"]::-webkit-search-cancel-button,
+    input[type="search"]::-webkit-search-decoration { -webkit-appearance:none }
+    fieldset { border:1px solid #c0c0c0; margin:0 2px; padding:0.35em 0.625em 0.75em }
+    legend { border:0; padding:0 }
+    textarea { overflow:auto }
+    optgroup { font-weight:bold }
+
+    /* Tables */
+    table { border-collapse:collapse; border-spacing:0 }
+    td,th { padding:0 }
+
+  </style>
+</head>
+<body>
+  <h1>Documentation</h1>
+Installing Apage
+----------------
+
+Old fashioned browser install, providing `window.Apage`: 
+```html
+<script src="http://apage.richplastow.com/build/apage.js"></script>
+<script>console.log( new window.Apage().I ); // -> 'Apage'</script>
+```
+
+Install as a [CommonJS Module](http://goo.gl/ZrbaB0), eg for 
+[Node](https://nodejs.org/): 
+```javascript
+var Apage = require('apage');
+console.log( new Apage().I ); // -> 'Apage'
+```
+
+Install using [RequireJS inline-style](http://goo.gl/mp7Snw), providing `Apage` 
+as an argument: 
+```html
+<script src="lib/require.js"></script>
+<script>
+  require(['path/to/apage'], function(Apage) {
+    console.log( new Apage().I ); // -> 'Apage'
+  })
+</script>
+```
+
+@todo more installation examples, including `$ npm install -g apage`, etc. 
+
+
+
+
+Testing Apage
+-------------
+
+Test with [npm scripts](http://goo.gl/UYupZI) on the command line: 
+```bash
+npm test
+```
+
+Test on the client:  
+Open [test/run-test.html](http://apage.richplastow.com/test/run-test.html) in 
+a web browser
+
+
+
+
+Installing Build Tools
+----------------------
+
+Install [coffee](http://coffeescript.org/) 1.9.1 on the command line: 
+```bash
+sudo npm install -g coffee-script
+```
+
+Install [nodemon](http://nodemon.io/) 1.3.7: 
+```bash
+sudo npm install -g nodemon
+```
+
+Install [marked](https://github.com/chjj/marked) 0.3.3: 
+```bash
+sudo npm install -g marked
+```
+
+
+
+The Build Process
+-----------------
+
+#### Build Apage on the command line
+
+```bash
+npm run build
+```
+
+#### Build with tests and watch for changes
+
+```bash
+npm run watch
+```
+
+@todo explanation of these, especially `watch`.  
+@todo section on `npm run source`. Handy Scripts
+-------------
+
+#### `v:list`
+Shows a list of files which contain the `version` string from ‘package.json’. 
+Each filename is suffixed by a colon, followed by the line-number where the 
+version string appears, eg `README.md:1 package.json:4`. 
+
+```bash
+npm run v:list
+```
+
+Which runs: 
+
+```bash
+grep -ron $npm_package_version * | awk 1 ORS=' ' | sed "s@:$npm_package_version@@g"
+```
+
+Or verbosely: 
+
+```bash
+grep --recursive --only-matching --line-number $npm_package_version * \
+| \
+awk 1 ORS=' ' \
+| \
+sed "s@:$npm_package_version@@g"
+```
+
+Which means: 
+
+1.  Use `grep` to get a newline-delimited list of files which contain the 
+    `version` string from ‘package.json’
+    - `--recursive` search in subdirectories
+    - `--only-matching` don’t show leading/trailing context in the results
+    - `--line-number` included after a colon, eg `bower.json:3`
+2.  Pipe the list to `awk`
+3.  [Convert all newlines to spaces](http://goo.gl/1WNas5)
+4.  Pipe the list to `sed`
+3.  Delete the trailing colon and version from each filename, eg `:1.2.3-4`
+
+If you want to find for a particular string in the file content, use:
+```bash
+grep -r 'the string' *
+```
+
+
+
+
+#### `v:open`
+Opens a list of files which contain the `version` string from ‘package.json’ in 
+Sublime Text. You will need Sublime Text installed, and a symlink to its `subl` 
+binary [added to your PATH](http://goo.gl/wJqkjY). 
+
+```bash
+npm run v:open
+```
+
+Which runs: 
+
+```bash
+subl $(npm run v:list --loglevel silent)
+```
+
+Note `--loglevel silent`, which prevents `subl` from being sent the results-log 
+which `npm run` usually outputs. 
+
+
+
+
+
+</body>
+</html>

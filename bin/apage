@@ -1,0 +1,181 @@
+#!/usr/bin/env node
+
+/*! Apage CLI 0.0.3 //// MIT Licence //// http://apage.richplastow.com/ */
+
+!function (root) {
+
+    'use strict';
+
+
+    //// Load Node modules and Apage.
+    var fs    = require('fs')
+      , util  = require('util')
+      , Apage = require('../')
+
+
+    //// Declare and initialize variables.
+      , argv = process.argv.slice()
+      , arg
+      , flag = false
+      , inputs = []
+      , e
+      , i
+      , input
+      , output
+      , titles = []
+      , articles = []
+      , articleTally = 0
+
+
+    //// Usage instructions.
+      , help = [
+            'Apage'
+          , '====='
+          , ''
+          , 'Apage generates a single HTML page from multiple markdown sources.'
+          , ''
+          , ''
+          , 'Usage'
+          , '-----'
+          , ''
+          , 'apage -i foo.md bar.md -o foobar.html'
+          , 'apage --title Doc Pages --output index.htm --input doc/*.md'
+          , ''
+          , ''
+          , 'Options'
+          , '-------'
+          , ''
+          , '-h --help     Show this help.'
+          , '-i --input    One or more input files, treated as markdown.'
+          , '-o --output   An output HTML file.'
+          , '-t --title    The page title (optional, defaults to --output).'
+          , '-v --version  Show the Apage version.'
+          , ''
+          , ''
+        ]
+
+
+    //// `normalizeArg()` deals with arguments like '--foo=bar' and '-xyz'.
+      , normalizeArg = function () {
+
+            // Remove the first argument from `argv`.
+            var a = argv.shift();
+
+            // Deal with 'foo', '--' or '-'.
+            if ('-' !== a.substr(0, 1) || '--' === a || '-' === a) { return a; }
+
+            // Deal with '--foo', '--foo=bar' or even '--foo=bar=1'.
+            if ( '--' === a.substr(0, 2) ) {
+                a = a.split('=');
+                if (1 < a.length) {
+                    argv.unshift( a.slice(1).join('=') ); // reinstate 'bar=1'
+                }
+                return a[0]; // eg '--foo'
+            }
+
+            // No need to process a single argument, eg '-x'.
+            if (2 == a.length) { return a; }
+
+            // Deal with '-xyz', which is shorthand for '-x -y -z'.
+            argv = a
+               .substr(2) // trim the leading '-x'
+               .split('') // convert 'yz' to ['y','z']
+               .map( function (c) { return '-' + c; } ) // ['-y', '-z']
+               .concat(argv) // prepend these elements onto `argv`
+            ;
+            return a.substr(0, 2); // return '-x'
+        }
+
+
+    //// `exit()` cleanly quits the CLI, eg `return exit(3, "Oops, problems!")`.
+      , exit = function (code, message, indent) {
+            indent = indent ? '\n  ' + indent : '';
+            process.stdout.write(message + indent + '\n');
+            process.exit(code);
+        }
+
+
+    //// `renderPage()` creates the HTML '--output' file.
+      , renderPage = function () {
+
+            //// Get the title, if set, and create an `Apage` instance.
+            var
+                title = titles.length ? titles.join(' ') : output
+              , apage = new Apage({ title:title })
+              , html
+            ;
+
+            //// Append each article to the page.
+            for (i=0; i<articleTally; i++) {
+                try {
+                    apage.appendContent( articles[i].raw );
+                } catch (e) {
+                    return exit(3, "Error in '" + articles[i].input + "':", e);
+                }
+            }
+
+            //// Render the page as an HTML string.
+            try {
+                html = apage.render();
+            } catch (e) {
+                return exit(4, 'Error rendering page:', e);
+            }
+
+            //// Write the HTML ot the '--output' file.
+            fs.writeFile( output, html, 'utf8', function (e) {
+                if (e) { return exit(5, "Error writing '" + output + "':", e); }
+                exit(0, html.length + " bytes written to '" + output + "'");
+            });
+        }
+    ;
+
+
+    //// Process each argument.
+    while (argv.length) {
+        arg = normalizeArg();
+        switch (arg) {
+            case '-h':
+            case '--help':
+                return exit( 0, help.join('\n') );
+            case '-i':
+            case '--input':
+                flag = 'input';
+                break;
+            case '-o':
+            case '--output':
+                flag = 'output';
+                output = argv.shift();
+                break;
+            case '-t':
+            case '--title':
+                flag = 'title';
+                break;
+            case '-v':
+            case '--version':
+                return exit( 0, (new Apage).V );
+            default:
+                if ('input' == flag) { inputs.push(arg); } // an input path
+                if ('title' == flag) { titles.push(arg); } // part of the title
+        }
+    }
+
+
+    //// Deal with missing '--input' or '--output' arguments.
+    if (0 == inputs.length || ! output) {
+        return exit(1, 'Please supply --input file(s) and an --output file');
+    }
+
+
+    //// Populate `articles` with the raw content of each '--input' file.
+    for (i in inputs) {
+        ( function (i, input) { // closure, preserves `i` in `articles[i] = ...`
+            fs.readFile(input, 'utf8', function (e, data) {
+                if (e) { return exit(2, "Error reading '" + input + "':", e); }
+                articles[i] = { input: input, raw: data };
+                if (++articleTally === inputs.length) { renderPage(); }
+            });
+        }(i, inputs[i]) );
+    };
+
+
+}(this);

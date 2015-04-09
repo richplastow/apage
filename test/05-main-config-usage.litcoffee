@@ -25,7 +25,7 @@ Typical use of `config()` on the `Apage` class.
     tudor.equal [
 
       "Returned object contains expected defaults"
-      '{"title":"Untitled"}'
+      '{"title":"Untitled","content":""}'
       (mock) -> JSON.stringify mock.config()
 
       "Returns a new object each time"
