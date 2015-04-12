@@ -1,5 +1,5 @@
 Handy Scripts
--------------
+=============
 
 #### `v:list`
 Shows a list of files which contain the `version` string from ‘package.json’. 
@@ -13,13 +13,14 @@ npm run v:list
 Which runs: 
 
 ```bash
-grep -ron $npm_package_version * | awk 1 ORS=' ' | sed "s@:$npm_package_version@@g"
+grep -ron $npm_package_version {bin,src,*.json} | awk 1 ORS=' ' | sed "s@:$npm_package_version@@g"
 ```
 
 Or verbosely: 
 
 ```bash
-grep --recursive --only-matching --line-number $npm_package_version * \
+grep --recursive --only-matching --line-number $npm_package_version \
+{bin,src,package.json} \
 | \
 awk 1 ORS=' ' \
 | \
@@ -33,12 +34,13 @@ Which means:
     - `--recursive` search in subdirectories
     - `--only-matching` don’t show leading/trailing context in the results
     - `--line-number` included after a colon, eg `bower.json:3`
-2.  Pipe the list to `awk`
-3.  [Convert all newlines to spaces](http://goo.gl/1WNas5)
-4.  Pipe the list to `sed`
-3.  Delete the trailing colon and version from each filename, eg `:1.2.3-4`
+2.  Search in bin/, src/, package.json, bower.json, etc
+3.  Pipe the list to `awk`
+4.  [Convert all newlines to spaces](http://goo.gl/1WNas5)
+5.  Pipe the list to `sed`
+6.  Delete the trailing colon and version from each filename, eg `:1.2.3-4`
 
-If you want to find for a particular string in the file content, use:
+If you want to find for a particular string in the repo content, use: 
 ```bash
 grep -r 'the string' *
 ```

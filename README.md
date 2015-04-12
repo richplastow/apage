@@ -1,7 +1,7 @@
 Apage
 =====
 
-#### Apage generates a single HTML page from multiple markdown sources. 
+#### Apage generates a single HTML page from multiple markdown sources
 
 - [Homepage](http://apage.richplastow.com/)
 - [Documentation](http://apage.richplastow.com/doc/)

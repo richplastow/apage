@@ -69,6 +69,15 @@ This will usually be a relative path, eg 'doc/03-third-doc-article.md'.
 
 
 
+#### `title`
+The article’s title is the first line of markdown. @todo allow meta to override
+
+        @title = (@_config.raw.split '\n')[0]
+
+
+
+
+
 #### `html`
 The article’s HTML is parsed from the raw data using the `marked` library. 
 

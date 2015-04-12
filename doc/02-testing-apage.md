@@ -1,7 +1,7 @@
 Testing Apage
--------------
+=============
 
-Test with [npm scripts](http://goo.gl/UYupZI) on the command line: 
+Test with [npm run-scripts](http://goo.gl/UYupZI) on the command line: 
 ```bash
 npm test
 ```

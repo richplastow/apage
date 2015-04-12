@@ -1,5 +1,5 @@
 Installing Build Tools
-----------------------
+======================
 
 Install [coffee](http://coffeescript.org/) 1.9.1 on the command line: 
 ```bash
