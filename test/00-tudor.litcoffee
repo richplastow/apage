@@ -37,19 +37,19 @@ Define public methods
 ---------------------
 
 #### `do()`
-Run the tests and return the result in markdown format. 
+Run the test and return the result. 
 
       do: =>
         md = [] # initialize markdown lines
         tallies = [ 0, 0 ] # pass, fail
         double = null
         for job in @jobs
-          switch ª.type job
-            when 'function' # replace the previous `double`
+          switch ªtype job
+            when ªF # a mock-modifier
               double = job(double)
-            when 'string' # eg a '- - -' rule, or a page or section heading
+            when ªS # a '- - -' rule, or a page or section heading
               md.push job
-            when 'array' # tests in the form `[ runner, name, expect, actual ]`
+            when ªA # assertion in the form `[ runner, name, expect, actual ]`
               [ runner, name, expect, actual ] = job # dereference
               result = runner(expect, actual, double) # run the test
               if ! result
@@ -60,7 +60,7 @@ Run the tests and return the result in markdown format.
                 md.push "    #{result}  "
                 tallies[1]++ # fail tally
 
-Generate a summary message.
+Generate a summary message. 
 
           summary  = "  passed #{tallies[0]}/#{tallies[0] + tallies[1]} "
           summary += if tallies[1] then '\u2718' else '\u2714'
@@ -92,34 +92,13 @@ Add a section heading.
 
 
 
-#### `custom()`
-Schedule a custom test. 
-
-      custom: (tests, runner) ->
-        i = 0
-        while i < tests.length
-          if 'function' == ª.type tests[i]
-            @jobs.push tests[i]
-          else
-            @jobs.push [
-              runner     # <function>  runner  Function which will run the test
-              tests[i]   # <string>    name    A short description of the test
-              tests[++i] # <mixed>     expect  Defines a successful test
-              tests[++i] # <function>  actual  Produces the result to test
-            ]
-          i++
-        @jobs.push '- - -' # http://goo.gl/TWH3W3
-
-
-
-
 #### `fail()`
 Format a typical fail message. 
 
       fail: (result, delivery, expect, types) ->
         if types
-          result = "#{invisibles result} (#{ª.type result})"
-          expect = "#{invisibles expect} (#{ª.type expect})"
+          result = "#{invisibles result} (#{ªtype result})"
+          expect = "#{invisibles expect} (#{ªtype expect})"
         "#{invisibles result}\n    ...was #{delivery}, but expected...\n    #{invisibles expect}"
 
 
@@ -135,11 +114,32 @@ Convert to string, and reveal invisible characters. @todo not just space
 
 
 
-#### `throws()`
-Expect `actual()` to throw an exception. 
+#### `custom()`
+Schedule a list of assertions which all use a single assertion-runner. 
 
-      throws: (tests) ->
-        @custom tests, (expect, actual, double) =>
+      custom: (al, runner) ->
+        i = 0
+        while i < al.length
+          if ªF == ªtype al[i] # the assert-list element is a mock-modifier...
+            @jobs.push al[i]
+          else # ...or is the first of three elements which define an assertion
+            @jobs.push [
+              runner  # <function>  runner  Function to run the assertion
+              al[i]   # <string>    name    Short description of the assertion
+              al[++i] # <mixed>     expect  Defines a successful assertion
+              al[++i] # <function>  actual  Produces the result to assertion
+            ]
+          i++
+        @jobs.push '- - -' # http://goo.gl/TWH3W3
+
+
+
+
+#### `throws()`
+An assertion-runner which expects `actual()` to throw an exception. 
+
+      throws: (al) ->
+        @custom al, (expect, actual, double) =>
           error = false
           try actual(double) catch e then error = e.message
           if ! error
@@ -151,10 +151,10 @@ Expect `actual()` to throw an exception.
 
 
 #### `equal()`
-Expect `actual()` and `expect` to be equal. 
+An assertion-runner which expects `actual()` and `expect` to be equal. 
 
-      equal: (tests) ->
-        @custom tests, (expect, actual, double) =>
+      equal: (al) ->
+        @custom al, (expect, actual, double) =>
           error = false
           try result = actual(double) catch e then error = e.message
           if error
@@ -166,16 +166,34 @@ Expect `actual()` and `expect` to be equal.
 
 
 #### `is()`
-Expect `ª.type( actual() )` and `expect` to be equal. 
+An assertion-runner which expects `ªtype( actual() )` and `expect` to be equal. 
 
-      is: (tests) ->
-        @custom tests, (expect, actual, double) =>
+      is: (al) ->
+        @custom al, (expect, actual, double) =>
           error = false
           try result = actual(double) catch e then error = e.message
           if error
             "Unexpected exception...\n    #{error}"
-          else if expect != ª.type result
-            @fail "type #{ª.type result}", 'returned', "type #{expect}"
+          else if expect != ªtype result
+            @fail "type #{ªtype result}", 'returned', "type #{expect}"
+
+
+
+
+Instantiate the `tudor` object
+------------------------------
+
+Create an instance of `Tudor`, to add assertions to. 
+
+    tudor = new Tudor
+      format: if ªO == typeof window then 'html' else 'plain'
+
+
+Expose `todor`’s `do()` function as a module method, so that any consumer of 
+this module can run its assertions. In Node, for example:  
+`require('foo').runTest();`
+
+    Main.runTest = tudor.do
 
 
 

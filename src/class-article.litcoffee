@@ -1,22 +1,16 @@
-Class Main
-==========
+Class Article
+=============
 
-#### The module’s only entry-point
-
-
+#### Represents a single article within the page or site
 
 
-Define the `Main` class
------------------------
 
-The `Main` class is synonymous with the module itself, so its identifier `I` 
-and version `V` are the same as the module’s `ªI` and `ªV`. Note that `ªI` and 
-`ªV` will be injected during the build process by `akaybe-build`, which gets 
-the current title and version from ‘package.json’. 
 
-    class Main
-      I: ªI
-      V: ªV
+Define the `Article` class
+--------------------------
+
+    class Article
+      I: 'Article'
       toString: -> "[object #{@I}]"
 
 
@@ -33,7 +27,8 @@ See `ªpopulate()` for a description of the `rule` format.
 
       _rules:
         config: [
-          ['title','Untitled','string',/^[^\x00-\x1F]{1,24}$/]
+          ['path',undefined       ,'string',/^[-.\/a-zA-Z0-9]{1,64}$/]
+          ['raw' ,'@todo\n=====\n','string',/^[^\x00-\x08\x0E-\x1F]{0,10000}$/] #@todo better list of valid characters
         ]
 
 
@@ -51,13 +46,6 @@ The instance configuration. Use `config()` to get and set it.
 
 
 
-#### `_articles`
-The page or site content. Use `append()` to add an article to it. @todo allow CRUD
-
-        @_articles = []
-
-
-
 
 Constructor functionality
 -------------------------
@@ -66,6 +54,25 @@ Validate `config` against `_rules.config`, and populate `_config` if it passes.
 
         if errors = ªpopulate config, @_config, @_rules.config
           throw new Error 'Invalid `config`:\n  ' + errors.join '\n  '
+
+
+
+
+Define public properties
+------------------------
+
+#### `path`
+This will usually be a relative path, eg 'doc/03-third-doc-article.md'. 
+
+        @path = @_config.path
+
+
+
+
+#### `html`
+The article’s HTML is parsed from the raw data using the `marked` library. 
+
+        @html = (marked @_config.raw).replace(/\\/g, '\\\\').split '\n'
 
 
 
@@ -113,26 +120,6 @@ invalid the whole operation fails, so `a`’s value remains unchanged.
             obj = {}
             obj[key] = value
             @config obj
-
-
-
-
-#### `append()`
-Adds an article to `_articles`. Throws an error if `article` is invalid. 
-
-      append: (article) ->
-        if ! article then return @
-        @_articles.push new Article article
-        @ # allow chaining
-
-
-
-
-#### `render()`
-Returns the html page, based on the current configuration. 
-
-      render: ->
-        "#{header @_config, @_articles}\n</body>\n</html>\n"
 
 
 

@@ -13,11 +13,11 @@ Typical use of `render()` on the `Apage` class.
       -> new Main
 
       "`render()` is a function"
-      F
+      ªF
       (mock) -> mock.render
 
       "Returns a string"
-      S
+      ªS
       (mock) -> mock.render()
 
     ]
@@ -25,11 +25,11 @@ Typical use of `render()` on the `Apage` class.
     tudor.equal [
 
       "Returned string is expected length"
-      2675
+      2725
       (mock) -> mock.render().length
 
       "Shorter `title` changes string length"
-      2663
+      2713
       (mock) -> mock.config 'title', 'OK'; mock.render().length
 
     ]

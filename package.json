@@ -1,14 +1,14 @@
 {
   "name": "apage",
-  "title": "Apage",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "license": "MIT",
   "homepage": "http://apage.richplastow.com/",
   "author": "Rich Plastow <rich@richplastow.com> (http://richplastow.com/)",
-  "description": "Generate a page from lots of markdown",
+  "description": "A single-page website from lots of markdown",
   "main": "./build/apage.js",
   "bin":{
-    "apage": "./bin/apage"
+    "apage": "./bin/apage",
+    "akaybe-build": "./bin/akaybe-build"
   },
   "preferGlobal": true,
   "repository": {
@@ -27,18 +27,16 @@
     "coffeescript",
     "litcoffee"
   ],
+  "dependencies": {
+    "marked": "latest"
+  },
   "devDependencies": {
     "coffee-script": "latest",
     "nodemon": "latest"
   },
   "scripts": {
+    "build": "node bin/akaybe-build",
     "test": "node test/run-test.js",
-    "source": "npm run v:head --loglevel silent | cat - node_modules/akaybe/src/*.litcoffee src/*.litcoffee",
-    "build": "npm run source --loglevel silent | coffee --stdio --literate --compile > build/apage.js",
-    "watch": "nodemon -x \"npm run source --loglevel silent | cat - test/*.litcoffee | coffee -slc > build/test/apage-with-test.js\" -e litcoffee -w src -w test",
-    "v:list": "grep -ron $npm_package_version * | awk 1 ORS=' ' | sed \"s@:$npm_package_version@@g\"",
-    "v:open": "subl $(npm run v:list --loglevel silent)",
-    "v:head": "echo \"    ###! $npm_package_title $npm_package_version //// $npm_package_license Licence //// $npm_package_homepage ###\\n    I = '$npm_package_title'\\n    V = '$npm_package_version'\\n\"",
     "pages": "npm run p:home; npm run p:doc; ",
     "p:home": "./bin/apage -i README.md -o index.html -t Apage",
     "p:doc": "./bin/apage --output doc/index.html --title Documentation --input doc/*.md"

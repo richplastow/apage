@@ -29,19 +29,19 @@ Instantiation of the `Apage` class which leads to an exception being thrown.
     tudor.throws [
 
       "A number"
-      "Invalid `config`:\n  Key 'title' is type 'number' not 'string'"
+      "Invalid `config`:\n  Field 'title' is type 'number' not 'string'"
       -> new Main { title:0 }
 
       "An empty string"
-      "Invalid `config`:\n  Key 'title' fails /^[^\\x00-\\x1F]{1,24}$/"
+      "Invalid `config`:\n  Field 'title' fails /^[^\\x00-\\x1F]{1,24}$/"
       -> new Main { title:'' }
 
       "25 characters long"
-      "Invalid `config`:\n  Key 'title' fails /^[^\\x00-\\x1F]{1,24}$/"
+      "Invalid `config`:\n  Field 'title' fails /^[^\\x00-\\x1F]{1,24}$/"
       -> new Main { title:'1234567890123456789012345' }
 
       "Contains a tab"
-      "Invalid `config`:\n  Key 'title' fails /^[^\\x00-\\x1F]{1,24}$/"
+      "Invalid `config`:\n  Field 'title' fails /^[^\\x00-\\x1F]{1,24}$/"
       -> new Main { title:'tab character: \t' }
 
     ]

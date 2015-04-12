@@ -5,17 +5,19 @@ Export Module
 
 First, try defining an AMD module, eg for [RequireJS](http://requirejs.org/). 
 
-    if F == typeof define and define.amd
+    if ªF == typeof define and define.amd
       define -> Main
 
-Next, try exporting for CommonJS, eg [Node](http://goo.gl/Lf84YI). 
+Next, try exporting for CommonJS, eg for [Node](http://goo.gl/Lf84YI):  
+`var foo = require('foo');`
 
-    else if O == typeof module and module and module.exports
+    else if ªO == typeof module and module and module.exports
       module.exports = Main
 
-Otherwise, add it to global scope, eg `myApage = new window.Apage()`. 
+Otherwise, add the `Main` class to global scope. Browser usage would be:  
+`var foo = new window.Foo();`
 
-    else @[I] = Main
+    else @[ªI] = Main
 
 
 

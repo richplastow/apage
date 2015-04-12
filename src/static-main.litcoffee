@@ -16,7 +16,7 @@ hidden from code defined elsewhere. They are characterized as follows:
 #### `header()`
 Returns the html header, from the opening DOCTYPE to the end of the topnav. 
 
-    header = (config) ->
+    header = (config, articles) ->
       """
       <!DOCTYPE html>
       <html lang="en">
@@ -24,8 +24,11 @@ Returns the html header, from the opening DOCTYPE to the end of the topnav.
         <title>#{config.title}</title>
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
         <style>
-          #{style()}
+          #{style config}
         </style>
+        <script>
+          #{script articles}
+        </script>
       </head>
       <body>
         <h1>#{config.title}</h1>
@@ -35,9 +38,9 @@ Returns the html header, from the opening DOCTYPE to the end of the topnav.
 
 
 #### `style()`
-Returns inline CSS for the header. 
+Returns a block of CSS for the header. 
 
-    style = ->
+    style = (config) -> #@todo add custom styles from config
       """
       /* normalize.css v3.0.3 | MIT License | github.com/necolas/normalize.css */
 
@@ -102,5 +105,29 @@ Returns inline CSS for the header.
           td,th { padding:0 }
 
       """
+
+
+
+
+#### `script()`
+Returns a block of JavaScript for the header. 
+
+    script = (articles) ->
+      out = ['var articles = [']
+
+      for article,i in articles
+        out = out.concat [
+          "  { path: '#{article.path}',"
+          "    html: ["
+        ]
+        for line in article.html
+          out.push "      '#{line}',"
+        out.push "    ] },"
+
+      out = out.concat ['];']
+      out.join '\n    '
+
+
+
 
 

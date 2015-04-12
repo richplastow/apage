@@ -13,11 +13,11 @@ Typical use of `config()` on the `Apage` class.
       -> new Main
 
       "`config()` is a function"
-      F
+      ªF
       (mock) -> mock.config
 
       "Returns an object"
-      O
+      ªO
       (mock) -> mock.config()
 
     ]
@@ -25,7 +25,7 @@ Typical use of `config()` on the `Apage` class.
     tudor.equal [
 
       "Returned object contains expected defaults"
-      '{"title":"Untitled","content":""}'
+      '{"title":"Untitled"}'
       (mock) -> JSON.stringify mock.config()
 
       "Returns a new object each time"
@@ -81,7 +81,7 @@ Typical use of `config()` on the `Apage` class.
     tudor.is [
 
       "Returns an array"
-      A
+      ªA
       (mock) -> mock.config 'title', ''
 
     ]
@@ -93,7 +93,7 @@ Typical use of `config()` on the `Apage` class.
       (mock) -> (mock.config 'title', '').length
 
       "The array element is an expected error message"
-      "Key 'title' fails /^[^\\x00-\\x1F]{1,24}$/"
+      "Field 'title' fails /^[^\\x00-\\x1F]{1,24}$/"
       (mock) -> (mock.config 'title', '')[0]
 
     ]

@@ -11,13 +11,13 @@ Typical instantiation of the `Apage` class (called `Main` internally).
     tudor.is [
 
       "Class is a function"
-      F
+      ªF
       -> Main
 
       -> new Main
 
       "Instance is an object"
-      O
+      ªO
       (mock) -> mock
 
     ]
