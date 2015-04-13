@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 
-/*! apage CLI 0.0.6 //// MIT Licence //// http://apage.richplastow.com/ */
+/*! apage CLI 0.0.7 //// MIT Licence //// http://apage.richplastow.com/ */
 
 !function (root) { 'use strict';
 
 
     //// Define constants.
     var I     = 'apage'
-      , V     = '0.0.6'
+      , V     = '0.0.7'
 
 
     //// Load Node modules and Apage.
@@ -17,7 +17,8 @@
 
 
     //// Declare and initialize variables.
-      , argv = process.argv.slice()
+      , pkg   = {}
+      , argv  = process.argv.slice()
       , arg
       , flag = false
       , inputs = []
@@ -101,13 +102,33 @@
         }
 
 
+    //// `packageField()` retrieves a given field from ‘package.json’.
+      , packageField = function (key) {
+            if (! pkg.json) {
+                try { pkg.json = JSON.parse( fs.readFileSync('package.json') ) }
+                catch (e) { exit(1, 'Cannot read and parse package.json', e) }
+            }
+            return pkg.json[key];
+        }
+
+
+    //// `entitle()` converts a `name` field to a `title`.
+      , entitle = function (name) {
+            var title = [];
+            name.split('-').forEach( function (word) {
+                title.push( word[0].toUpperCase() + word.substr(1) );
+            });
+            return title.join('');
+        }
+
+
     //// `renderPage()` creates the HTML '--output' file.
       , renderPage = function () {
 
             //// Get the title, if set, and create an `Apage` instance.
             var
                 title = titles.length ? titles.join(' ') : output
-              , apage = new Apage({ title:title })
+              , apage = new Apage({ title:title, url:pkg.homepage })
               , html
             ;
 
@@ -136,7 +157,18 @@
     ;
 
 
+    //// Populate `pkg` with useful values from ‘package.json’
+    pkg = { // note that `process.env.npm_package_*` is for `npm run ...` calls
+        name:     process.env.npm_package_name     || packageField('name')
+      , title:    process.env.npm_package_title    || packageField('title')
+      , version:  process.env.npm_package_version  || packageField('version')
+      , license:  process.env.npm_package_license  || packageField('license')
+      , homepage: process.env.npm_package_homepage || packageField('homepage')
+    }
+
+
     //// Process each argument.
+    argv.splice(0, 2); // ignore 'node' and the path to this file
     while (argv.length) {
         arg = normalizeArg();
         switch (arg) {

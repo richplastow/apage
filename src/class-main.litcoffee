@@ -34,6 +34,7 @@ See `ªpopulate()` for a description of the `rule` format.
       _rules:
         config: [
           ['title','Untitled','string',/^[^\x00-\x1F]{1,24}$/]
+          ['url',false,'string',/^[-:.\/a-z0-9]{1,64}$/] #@todo improve regexp
         ]
 
 
@@ -132,7 +133,7 @@ Adds an article to `_articles`. Throws an error if `article` is invalid.
 Returns the html page, based on the current configuration. 
 
       render: ->
-        "#{header @_config, @_articles}\n</body>\n</html>\n"
+        "#{page @_config, @_articles}"
 
 
 

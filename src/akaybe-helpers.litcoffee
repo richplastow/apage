@@ -22,6 +22,14 @@ A handy shortcut for `console.log()`. Note [`bind()`](http://goo.gl/66ffgl).
 
 
 
+#### `ªhas()`
+Determines whether haystack contains a given needle. @todo arrays and objects
+
+    ªhas = (h, n, t=true, f=false) -> if -1 != h.indexOf n then t else f
+
+
+
+
 #### `ªtype()`
 To detect the difference between 'null', 'array', 'regexp' and 'object' types, 
 we use [Angus Croll’s one-liner](http://goo.gl/WlpBEx). This can be used in 

@@ -41,7 +41,7 @@ Run the test and return the result.
 
       do: =>
         md = [] # initialize markdown lines
-        tallies = [ 0, 0 ] # pass, fail
+        passed = failed = 0 # pass, fail
         double = null
         for job in @jobs
           switch ªtype job
@@ -54,16 +54,18 @@ Run the test and return the result.
               result = runner(expect, actual, double) # run the test
               if ! result
                 md.push "\u2713 #{name}  " # Unicode CHECK MARK
-                tallies[0]++ # pass tally
+                passed++
               else
                 md.push "\u2718 #{name}  " # Unicode HEAVY BALLOT X
                 md.push "    #{result}  "
-                tallies[1]++ # fail tally
+                failed++
 
 Generate a summary message. 
 
-          summary  = "  passed #{tallies[0]}/#{tallies[0] + tallies[1]} "
-          summary += if tallies[1] then '\u2718' else '\u2714'
+          summary = if failed
+            "  FAILED #{failed}/#{passed + failed} \u2718"
+          else
+            "  passed #{passed}/#{passed + failed} \u2714"
 
 Return the result as a string. 
 

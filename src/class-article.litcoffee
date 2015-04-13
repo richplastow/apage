@@ -64,16 +64,38 @@ Define public properties
 #### `path`
 This will usually be a relative path, eg 'doc/03-third-doc-article.md'. 
 
-        @path = @_config.path
+        @path = @_config.path.replace /^[.\/]+/g, '' # leading '.', '/' or './'
+
+
+
+
+#### `meta`
+Meta data is optional, and based on [Jeyll frontmatter](http://goo.gl/4l6k2e). 
+
+        @meta = [] # will remain an empty array if no frontmatter is present
+        if '---\n' == @_config.raw.substr 0, 4 # the very top of the file
+          @_config.raw = @_config.raw.split '---\n'
+          for line,i in @_config.raw[1].split '\n' # each line of frontmatter
+            [key, value] = line.split ': '
+            if ! key or ! value then continue
+            if 'title' == key
+              @title = value
+            else
+              @meta[i] = { key:key, value:value }
+          @_config.raw = (@_config.raw.slice 2).join '---\n'
+          #@todo validate meta
+
+Trim newlines and extra spaces from the start and end of the raw markdown. 
+
+        @_config.raw = @_config.raw.replace /^\s+|\s+$/g, ''
 
 
 
 
 #### `title`
-The article’s title is the first line of markdown. @todo allow meta to override
+Unless set in meta, article’s `title` is its first line of markdown. 
 
-        @title = (@_config.raw.split '\n')[0]
-
+        @title = @title || (@_config.raw.split '\n')[0]
 
 
 

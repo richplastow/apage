@@ -1,5 +1,5 @@
 Installing Apage
-----------------
+================
 
 Old fashioned browser install, providing `window.Apage`: 
 ```html

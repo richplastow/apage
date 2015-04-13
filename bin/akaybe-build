@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 
-/*! akaybe-build 0.0.2 //// MIT Licence //// http://akaybe.richplastow.com/ */
+/*! akaybe-build 0.0.3 //// MIT Licence //// http://akaybe.richplastow.com/ */
 
 !function (root) { 'use strict';
 
 
     //// Define constants.
     var I     = 'akaybe-build'
-      , V     = '0.0.2'
+      , V     = '0.0.3'
 
 
     //// Load Node modules.
@@ -133,8 +133,8 @@
     //// `iandv()` returns a CoffeeScript line which defines `ªI` and `ªV`.
       , iandv = function (indent) {
             indent  = undefined === indent  ? '    ' : indent; // for litcoffee
-            return indent + "ªI = '" + pkg.title   + "'; " +
-                            "ªV = '" + pkg.version + "';"
+            return indent + "ªI = '" + pkg.title    + "'; " +
+                            "ªV = '" + pkg.version  + "';"
             ;
         }
 
@@ -143,7 +143,7 @@
 
     //// Populate `pkg` with useful values from ‘package.json’
     pkg = { // note that `process.env.npm_package_*` is for `npm run ...` calls
-        name:     process.env.npm_package_title    || packageField('name')
+        name:     process.env.npm_package_name     || packageField('name')
       , title:    process.env.npm_package_title    || packageField('title')
       , version:  process.env.npm_package_version  || packageField('version')
       , license:  process.env.npm_package_license  || packageField('license')
