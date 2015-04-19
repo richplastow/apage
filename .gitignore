@@ -1,3 +1,12 @@
+# Standard
 .DS_Store
-node_modules
+node_modules/*
 *.log
+
+# Dependencies (but not "devDependencies")
+!node_modules/marked
+node_modules/marked/*
+!node_modules/marked/lib
+node_modules/marked/lib/*
+!node_modules/marked/lib/marked.js
+
