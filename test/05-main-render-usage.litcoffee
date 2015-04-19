@@ -25,11 +25,11 @@ Typical use of `render()` on the `Apage` class.
     tudor.equal [
 
       "Returned string is expected length"
-      8240
+      8242
       (mock) -> mock.render().length
 
       "Shorter `title` changes string length"
-      8234
+      8236
       (mock) -> mock.config 'title', 'OK'; mock.render().length
 
     ]

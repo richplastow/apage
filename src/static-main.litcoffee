@@ -287,7 +287,7 @@ Returns a block of JavaScript for the header.
 Begin the output-array. 
 
       out = [
-        '!function (root) { \'use strict\';'
+        '(function (root) { \'use strict\';'
         '  var'
         ''
         '    //// Define the articles. '
@@ -372,9 +372,9 @@ Add functionality to show pages, and return the output as a string.
        ,update = function (query) {
           var a = resolve(query) || arts.undefined;
           $('.content').innerHTML =
-              a.html.join('\\n') +
-              '\\n<hr>\\n' +
-              formatMeta(a.meta)
+            a.html.join('\\n') +
+            '\\n<hr>\\n' +
+            formatMeta(a.meta)
           ;
           $('.nav .container').innerHTML = formatMenu(a);
           document.title = a.title;
@@ -414,10 +414,20 @@ Add functionality to show pages, and return the output as a string.
       //// ...and when the URL hash changes. 
       window.addEventListener('hashchange', onHashchange);
 
-
-    }(this);
+    //
     """
       ]
+
+Inject custom functionality, if the `plugin` config field has been set. 
+
+      if config.plugin
+        out = out.concat [
+          '\n  //// Begin plugin code.\n'
+          config.plugin
+          '\n  //// End plugin code.\n'
+        ]
+
+      out.push '}).call(this);'
       out.join '\n'
 
 

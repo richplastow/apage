@@ -35,6 +35,7 @@ See `ªpopulate()` for a description of the `rule` format.
         config: [
           ['title','Untitled','string',/^[^\x00-\x1F]{1,24}$/]
           ['url',false,'string',/^[-:.\/a-z0-9]{1,64}$/] #@todo improve regexp
+          ['plugin','','string',/^[^\x00-\x08\x0E-\x1F]{0,10000}$/] #@todo improve regexp
         ]
 
 

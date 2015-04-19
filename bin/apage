@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 
-/*! apage CLI 0.0.7 //// MIT Licence //// http://apage.richplastow.com/ */
+/*! apage CLI 0.0.8 //// MIT Licence //// http://apage.richplastow.com/ */
 
 !function (root) { 'use strict';
 
 
     //// Define constants.
     var I     = 'apage'
-      , V     = '0.0.7'
+      , V     = '0.0.8'
 
 
     //// Load Node modules and Apage.
@@ -21,11 +21,12 @@
       , argv  = process.argv.slice()
       , arg
       , flag = false
-      , inputs = []
       , e
       , i
       , input
       , output
+      , inputs = []
+      , plugins = []
       , titles = []
       , articles = []
       , articleTally = 0
@@ -39,13 +40,14 @@
           , 'Generate a single-page website from multiple markdown sources.'
           , ''
           , ''
-          , 'Usage'
-          , '-----'
+          , 'Basic Usage'
+          , '-----------'
           , ''
           , I + ' -h'
           , I + ' --version'
-          , I + ' -i foo.md bar.md -o foobar.html'
+          , I + ' -i foo.md bar.md -o foobar.html -p \'alert(arts.length)\''
           , I + ' --title Doc Pages --output index.htm --input doc/*.md'
+          , I + ' -o out.htm -i `find . -name \'*.md\'` -p "`cat a.js b.js`"'
           , ''
           , ''
           , 'Options'
@@ -54,8 +56,17 @@
           , '-h --help     Show this help.'
           , '-i --input    One or more input files, treated as markdown.'
           , '-o --output   An output HTML file.'
+          , '-p --plugin   One or more JavaScript plugins (see below).'
           , '-t --title    The site title (optional, defaults to --output).' //@todo defaults to <H1> of primary markdown file
           , '-v --version  Show the ' + I + ' version.'
+          , ''
+          , ''
+          , 'Plugin Usage'
+          , '------------'
+          , ''
+          , 'Xx. @todo'
+          , I + ' -i in.md -o out.html -p \'alert(arts.length)\''
+          , I + ' -i in.md -o out.html -p \"`cat build/plugin/*.js`\"'
           , ''
           , ''
         ]
@@ -127,8 +138,13 @@
 
             //// Get the title, if set, and create an `Apage` instance.
             var
-                title = titles.length ? titles.join(' ') : output
-              , apage = new Apage({ title:title, url:pkg.homepage })
+                title  = titles.length  ? titles.join(' ')  : output
+              , plugin = plugins.length ? plugins.join('\n') : ''
+              , apage = new Apage({
+                    title:  title
+                  , url:    pkg.homepage
+                  , plugin: plugin
+                })
               , html
             ;
 
@@ -184,6 +200,10 @@
                 flag = 'output';
                 output = argv.shift();
                 break;
+            case '-p':
+            case '--plugin':
+                flag = 'plugin';
+                break;
             case '-t':
             case '--title':
                 flag = 'title';
@@ -192,8 +212,10 @@
             case '--version':
                 return exit(0, V);
             default:
-                if ('input' == flag) { inputs.push(arg); } // an input path
-                if ('title' == flag) { titles.push(arg); } // part of the title
+                if (2 === arg.length && '-' === arg[0]) { flag = 'unknown'; }
+                else if ('input'  == flag) { inputs.push(arg);  } // an input path
+                else if ('plugin' == flag) { plugins.push(arg); } // a plugin path
+                else if ('title'  == flag) { titles.push(arg);  } // part of the title
         }
     }
 

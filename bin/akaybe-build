@@ -20,8 +20,10 @@
     //// Declare and initialize variables.
       , pkg   = {}
       , argv  = process.argv.slice()
+      , doPlugin = false
       , arg
-      , args
+      , builder
+      , ndArgs
       , nodemon
       , stdout
       , stderr
@@ -44,11 +46,12 @@
           , 'Injects Akaybe constants and functions during compilation.'
           , ''
           , ''
-          , 'Usage'
-          , '-----'
+          , 'Basc Usage'
+          , '----------'
           , ''
           , I + ' -h'
           , I + ' --version'
+          , I + ' -p'
           , ''
           , ''
           , 'Options'
@@ -56,6 +59,7 @@
           , ''
           , '-h --help     Show this help.'
           , '-v --version  Show the ' + I + ' version.'
+          , "-p --plugin   Build each file in the 'plugin/' directory."
           , ''
           , ''
         ]
@@ -163,6 +167,10 @@
             case '-h':
             case '--help':
                 return exit( 0, help.join('\n') );
+            case '-p':
+            case '--plugin':
+                doPlugin = true;
+                break;
             case '-v':
             case '--version':
                 return exit(0, V);
@@ -171,61 +179,109 @@
     }
 
 
-    //// Prepare arguments to send to a `nodemon` process.
-    args = [
+    //// Prepare the command which `nodemon` will run. 
+    builder =
+
+    //// Create CoffeeScript for the legal-comment and the `ªI` and `ªV` vars.
+        'echo "'  // begin a string which will be piped to `cat`
+      + '    ###' // `coffee` will convert this to '/*'
+      + '! '      // minifiers should preserve a comment starting '/*!'
+      + legal()   // add title, version, license and homepage
+      + ' ###\\n' // end the legal-comment
+      + iandv()   // inject the title and version into `ªI` and `ªV` vars
+      + ' \\n'    // newline after the `ªI` and `ªV` vars
+      + '" | '    // end the string, and pipe it to `cat`
+
+    //// Concatenate and compile the CoffeeScript, and save the JavaScript file.
+      + 'cat - '  // `cat` accepts piped text unix.stackexchange.com/a/16364
+      + 'src/*.litcoffee '
+      + '| '      // pipe concatenated CoffeeScript into `coffee`
+      + 'coffee'  // the CoffeeScript compiler
+      + ' -s'     // --stdio     listen for and compile scripts over stdio
+      + ' -l'     // --literate  treat stdio as litcoffee
+       // + ' -m'     // --map       generate '.js.map' source map files @todo
+      + ' -c'     // --compile   compile to JavaScript, save as .js file
+      + ' > '     // write to file, replace if pre-existing, create if missing
+      + 'build/' + pkg.name + '.js'
+
+    //// Repeat the above, for the test-build.
+      + '; '      // separate the production-build from the test-build
+      + 'echo "'  // begin a string which will be piped to `cat`
+      + '    ###' // `coffee` will convert this to '/*'
+      + '! '      // minifiers should preserve a comment starting '/*!'
+      + legal()   // add title, version, license and homepage
+      + ' ###\\n' // end the legal-comment
+      + iandv()   // inject the title and version into `ªI` and `ªV` vars
+      + ' \\n'    // newline after the `ªI` and `ªV` vars
+      + '" | '    // end the string, and pipe it to `cat`
+      + 'cat - '  // `cat` accepts piped text unix.stackexchange.com/a/16364
+      + 'src/*.litcoffee test/*.litcoffee '
+      + '| '      // pipe concatenated CoffeeScript into `coffee`
+      + 'coffee'  // the CoffeeScript compiler
+      + ' -s'     // --stdio     listen for and compile scripts over stdio
+      + ' -l'     // --literate  treat stdio as litcoffee
+      + ' -c'     // --compile   compile to JavaScript, save as .js file
+      + ' > '     // write to file, replace if pre-existing, create if missing
+      + 'build/test/' + pkg.name + '-with-test.js'
+    ;
+
+
+    //// If the `-p` flag is present, build each plugin as a separate file.
+    if (doPlugin) {
+        builder
+          +='; '      // separate the test-build from the plugin-build
+          + 'for f in ' // begin a for-loop, and declare the `$f` variable
+          + 'plugin/*.litcoffee; ' // glob all litcoffee plugin files
+          + 'do if [ -e "$f" ]; ' // skip nonexistent files goo.gl/ueO4sZ
+          + 'then '   // begin the main purpose of this loop
+
+          + 'echo "'  // begin a string xx
+          + '    ###' // `coffee` will convert this to '/*'
+          + '! '      // minifiers should preserve a comment starting '/*!'
+          + legal()   // add title, version, license and homepage
+          + '\\n $f'  // useful to preserve the plugin name
+          + ' ###\\n' // end the legal-comment
+          + '" | '    // end the string, and pipe it to `cat`
+
+          + 'cat - '  // `cat` accepts piped text unix.stackexchange.com/a/16364
+          + '"$f" '
+          + '| '      // pipe concatenated CoffeeScript into `coffee`
+
+          + 'coffee'  // the CoffeeScript compiler
+          + ' -s'     // --stdio     listen for and compile scripts over stdio
+          + ' -l'     // --literate  treat stdio as litcoffee
+       // + ' -m'     // --map       generate '.js.map' source map files @todo
+          + ' -c'     // --compile   compile to JavaScript, save as .js file
+          + ' > '     // write to file, replace pre-existing, create if missing
+          + 'build/"${f%.litcoffee}.js"' // rename stackoverflow.com/a/1225236
+
+          + '; fi; '  // end the `if` block
+          + 'done'    // end the `do` block
+        ;          
+    }
+
+
+    //// Prepare arguments to send to `nodemon`. 
+    ndArgs = [
         '-w','src'  // --watch  watch the ‘src/’ directory for changes
       , '-w','test' // --watch  watch the ‘test/’ directory for changes
-      , '-e'        // --ext    comma-delimited extensions to watch:
+    ];
+    if (doPlugin) {
+        ndArgs = ndArgs.concat([
+            '-w','plugin' // --watch  watch the ‘plugin/’ directory for changes
+        ]);
+    }
+    ndArgs = ndArgs.concat([
+        '-e'        // --ext    comma-delimited extensions to watch:
       , 'litcoffee' //            literate CoffeeScript files
         + ',coffee' //            standard CoffeeScript files
       , '-x'        // --exec   execute the following script
-
-    //// Create CoffeeScript for the legal-comment and the `ªI` and `ªV` vars.
-      , 'echo "'    // begin a string which will be piped to `cat`
-        + '    ###' // `coffee` will convert this to '/*'
-        + '! '      // minifiers should preserve a comment starting '/*!'
-        + legal()   // add title, version, license and homepage
-        + ' ###\\n' // end the legal-comment
-        + iandv()   // inject the title and version into `ªI` and `ªV` vars
-        + ' \\n'    // newline after the `ªI` and `ªV` vars
-        + '" | '    // end the string, and pipe it to `cat`
-
-    //// Concatenate and compile the CoffeeScript, and save the JavaScript file.
-        + 'cat - '  // `cat` receives piped text unix.stackexchange.com/a/16364
-        + 'src/*.litcoffee '
-        + '| '      // pipe concatenated CoffeeScript into `coffee`
-        + 'coffee'  // the CoffeeScript compiler
-        + ' -s'     // --stdio     listen for and compile scripts over stdio
-        + ' -l'     // --literate  treat stdio as litcoffee
-        + ' -m'     // --map       generate '.js.map' source map files
-        + ' -c'     // --compile   compile to JavaScript, save as .js file
-        + ' > '     // write to file, replace if pre-existing, create if missing
-        + 'build/' + pkg.name + '.js'
-
-    //// Repeat the above, for the test-build
-        + '; '      // separate the production-build from the test-build
-        + 'echo "'  // begin a string which will be piped to `cat`
-        + '    ###' // `coffee` will convert this to '/*'
-        + '! '      // minifiers should preserve a comment starting '/*!'
-        + legal()   // add title, version, license and homepage
-        + ' ###\\n' // end the legal-comment
-        + iandv()   // inject the title and version into `ªI` and `ªV` vars
-        + ' \\n'    // newline after the `ªI` and `ªV` vars
-        + '" | '    // end the string, and pipe it to `cat`
-        + 'cat - '  // `cat` receives piped text unix.stackexchange.com/a/16364
-        + 'src/*.litcoffee test/*.litcoffee '
-        + '| '      // pipe concatenated CoffeeScript into `coffee`
-        + 'coffee'  // the CoffeeScript compiler
-        + ' -s'     // --stdio     listen for and compile scripts over stdio
-        + ' -l'     // --literate  treat stdio as litcoffee
-        + ' -c'     // --compile   compile to JavaScript, save as .js file
-        + ' > '     // write to file, replace if pre-existing, create if missing
-        + 'build/test/' + pkg.name + '-with-test.js'
-    ];
+      , builder
+    ]);
 
 
     //// Spawn `nodemon`, which will rebuild ‘build/’ whenever a file changes.
-    nodemon = spawn('nodemon', args);
+    nodemon = spawn('nodemon', ndArgs);
 
 
     //// Convert standard lines of `stdout` to single '.' characters.
@@ -268,7 +324,7 @@
 
 
     //// Startup message.
-    process.stdout.write('' + I + ' ' + V + ' begun...\n');
+    process.stdout.write(I + ' ' + V + ' begun...\n');
 
 
 }(this);

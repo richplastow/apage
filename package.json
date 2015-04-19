@@ -1,6 +1,6 @@
 {
   "name": "apage",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "license": "MIT",
   "homepage": "http://apage.richplastow.com/",
   "author": "Rich Plastow <rich@richplastow.com> (http://richplastow.com/)",
@@ -35,9 +35,9 @@
     "nodemon": "latest"
   },
   "scripts": {
-    "build": "node bin/akaybe-build",
+    "build": "node bin/akaybe-build --plugin",
     "test": "node test/run-test.js",
-    "index": "./bin/apage -i README.md doc/*.md -o index.html -t Apage",
+    "index": "./bin/apage -i README.md doc/*.md -o index.html -t Apage -p \"`cat build/plugin/*.js`\"",
     "v:list": "grep -ron $npm_package_version {bin,src,*.json} | awk 1 ORS=' ' | sed \"s@:$npm_package_version@@g\"",
     "v:open": "subl $(npm run v:list --loglevel silent)"
   }

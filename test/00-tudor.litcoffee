@@ -41,7 +41,7 @@ Run the test and return the result.
 
       do: =>
         md = [] # initialize markdown lines
-        passed = failed = 0 # pass, fail
+        passed = failed = 0
         double = null
         for job in @jobs
           switch ªtype job

@@ -20,7 +20,7 @@ Or verbosely:
 
 ```bash
 grep --recursive --only-matching --line-number $npm_package_version \
-{bin,src,package.json} \
+{bin,src,*.json} \
 | \
 awk 1 ORS=' ' \
 | \
