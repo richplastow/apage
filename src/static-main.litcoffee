@@ -17,35 +17,56 @@ hidden from code defined elsewhere. They are characterized as follows:
 Returns the html page. 
 
     page = (config, articles) ->
-      """
-      <!DOCTYPE html>
-      <html lang="en">
-      <head>
-        <title>#{config.title}</title>
-        <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
-        <meta name="generator" content="#{ªI} #{ªV} http://apage.richplastow.com/">
-        <style>
-          #{style config}
-        </style>
-        <script>
-      #{script config, articles}
-        </script>
-      </head>
-      <body>
+      out = [
+        """
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <title>#{config.title}</title>
+      <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+      <meta name="generator" content="#{ªI} #{ªV} http://apage.richplastow.com/">
+      <style>
+        #{style config}
+      </style>
+    #{script config, articles}
+    </head>
+    <body>
 
-        <nav class="nav" tabindex="-1" onclick="this.focus()">
-          <div class="container">
-          </div>
-        </nav>
-        <div class="btn btn-sm btn-close">×</div>
-
+      <nav class="nav" tabindex="-1" onclick="this.focus()">
         <div class="container">
-          <div class="col content"></div>
         </div>
+      </nav>
+      <div class="btn btn-sm btn-close">×</div>
 
-      </body>
-      </html>
-      """
+      <div class="container">
+        <div class="col content"></div>
+      </div>
+
+        """
+      ]
+
+Begin each article, adding Apage’s standard data attributes. @todo better data-apage-front formatting, esp for long data
+
+      for article,i in articles
+        id = tidypath article.path
+        out.push """
+    <article      id="/#{id}"
+      data-apage-opath="/#{article.path}"
+      data-apage-dname="/#{dirname article.path}"
+      data-apage-order="#{ordername article.path}"
+      data-apage-front='#{(JSON.stringify article.front).replace /'/g,"&#39;"}'
+      data-apage-title="#{article.title}"
+                 class="apage">
+        """
+
+Add the article content, and finish the article. 
+
+        out.push filterLine config, line for line in article.html
+        out.push "</article><!-- #/#{id} -->\n\n"
+
+Finish up, and return the page HTML
+
+      out.join('\n  ') + '\n\n</body>\n</html>'
 
 
 
@@ -248,13 +269,12 @@ Returns a block of CSS for the header.
 
 
 #### `filterLine()` @todo more filtering
-Used by `script()` to localize URLs, so: 'http://foo.io/#bar' becomes '#bar'. 
+Used by `page()` to localize URLs, so: 'http://foo.io/#bar' becomes '#bar'. 
 
     filterLine = (config, line) ->
       if config.url
         rx = new RegExp 'href="' + config.url, 'g' #@todo src
-        line = line.replace rx, 'href="'
-      "          '#{line}',"
+        line.replace rx, 'href="'
 
 
 
@@ -284,151 +304,117 @@ Returns a block of JavaScript for the header.
 
     script = (config, articles) ->
 
-Begin the output-array. 
+No need for any JavaScript if there are no plugins. 
 
-      out = [
-        '(function (root) { \'use strict\';'
-        '  var'
-        ''
-        '    //// Define the articles. '
-        '    arts = ['
-      ]
+      unless config.plugin then return ''
 
-Add each article. 
+Render boilerplate Apage JavaScript, and then inject the plugins. 
 
-      for article,i in articles
-        out = out.concat [
-          "      { order: #{ordername article.path},"
-          "        path:  '/#{article.path}',"
-          "        tidy:  '/#{tidypath article.path}',"
-          "        dname: '/#{dirname  article.path}',"
-          "        title: '#{article.title}',"
-          "        meta: ["
-        ]
-        out.push "          ['#{field.key}','#{field.value}']," for field in article.meta
-        out = out.concat [
-          "        ],"
-          "        html: ["
-        ]
-        out.push filterLine config, line for line in article.html
-        out = out.concat [
-          "        ]"
-          "      },"
-        ]
+      """
 
-Add functionality to show pages, and return the output as a string. 
+      <script>
 
-      out = out.concat ["""
-        ]
+    //// When the DOM is ready, set up Apage and inject the plugins. 
+    window.addEventListener('load', function () { (function (d) { 'use strict'; 
 
 
-        //// Format meta data as HTML. 
-       ,formatMeta = function (meta) {
-          var o=['<div class="meta">'];
-          for (var i=0,l=meta.length; i<l; i++) {
-            o = o.concat(
-              '  <dl>'
-             ,'    <dt>' + meta[i][0] + '</dt>'
-             ,'    <dd>' + meta[i][1] + '</dd>'
-             ,'  </dl>'
-            );
-          }
-          return o.concat('</div>').join('\\n');
+    //// Declare iterator, length and HTML-reference variables. 
+    var i, l, $ref
+
+
+    //// Initialize two arrays which are available to all Apage plugins. 
+     ,arts = []
+     ,updaters = []
+
+
+    //// Like jQuery, but native. 
+     ,$  = d.querySelector.bind(d)
+     ,$$ = d.querySelectorAll.bind(d)
+
+
+    //// Get a reference to all `<article class="apage">` elements. 
+     ,$arts = $$('article.apage')
+
+
+    //// Return a renderable object based on a given query. 
+     ,resolve = function (query) {
+        if (! query) { return arts[0]; } // eg '#' or no hash
+        if (arts[query]) { return arts[query]; } // eg '#57' or '#/foo'
+        return arts.undefined; // like a 404 error
+      }
+
+
+    //// Run each updater in order. These are added by the plugins, below. 
+     ,update = function (query) {
+        var i, l, current = resolve(query);
+        for (i=0, l=updaters.length; i<l; i++) {
+          updaters[i](current);
         }
+      }
 
 
-        //// Generate the menu as HTML. 
-       ,formatMenu = function (curr) {
-          var o=['<div class="menu">'];
-          for (var i=0,l=arts.length,a,c; i<l; i++) {
-            a = arts[i];
-            c = [];
-            if (0 === a.order)        { c.push('index'); }
-            if (curr.tidy === a.tidy) { c.push('active'); }
-            if (0 === a.order || curr.dname === a.dname) {
-              o.push(
-                '  <a href="#' + a.tidy + '" ' +
-                ' class="' + c.join(' ') + '">' +
-                a.title + '</a>'
-              );
-            }
-          }
-          return o.concat('</div>').join('\\n');
-        }
+    //// Called when the page loads, and when the URL hash changes. 
+     ,onHashchange = function (event) {
+        update( window.location.hash.substr(1) ); // trim leading '#'
+        if (event) { event.preventDefault(); }
+      }
+
+    ;
 
 
-        //// One-liner jQuery ;-)
-       ,$ = function (s) { return document.querySelector(s); }
+    //// Populate `arts`, the articles array. 
+    for (i=0, l=$arts.length; i<l; i++) {
+      $ref = $arts[i];
+      arts.push({
+        id:    $ref.getAttribute('id')
+       ,opath: $ref.getAttribute('data-apage-opath')
+       ,dname: $ref.getAttribute('data-apage-dname')
+       ,order: $ref.getAttribute('data-apage-order')
+       ,front: JSON.parse( $ref.getAttribute('data-apage-front') )
+       ,title: $ref.getAttribute('data-apage-title')
+       ,$ref:  $ref
+      });
+    }
 
 
-        //// Return a renderable object based on a given query. 
-       ,resolve = function (query) {
-          if (! query) { return arts[0]; } // eg '#' or no hash
-          if (arts[query]) { return arts[query]; } // eg '#57' or '#/foo'
-        }
+    //// Add the 404 page. 
+    arts.undefined = {
+        id:    ''
+       ,opath: ''
+       ,dname: ''
+       ,order: 0
+       ,front: []
+       ,title: 'Article Not Found'
+       ,$ref:  d.createDocumentFragment()
+    };
+    arts.undefined.$ref.innerHTML = '<h1>Article Not Found</h1>';
 
 
-        //// Change the window content, eg display an article. 
-       ,update = function (query) {
-          var a = resolve(query) || arts.undefined;
-          $('.content').innerHTML =
-            a.html.join('\\n') +
-            '\\n<hr>\\n' +
-            formatMeta(a.meta)
-          ;
-          $('.nav .container').innerHTML = formatMenu(a);
-          document.title = a.title;
-        }
+    //// Add a route to the homepage at 'example.com/#/'. 
+    arts['/'] = arts[0] || arts.undefined;
 
 
-        //// Called when the page loads, and when the URL hash changes. 
-       ,onHashchange = function (event) {
-          update( window.location.hash.substr(1) ); // trim leading '#'
-          event.preventDefault();
-        }
+    //// Allow articles to be queried '#/with/a/path'. 
+    for (i=0,l=arts.length; i<l; i++) { arts[ arts[i].tidy ] = arts[i]; }
 
 
-      ;
-
-      //// Add default articles. 
-      arts['/'] = arts[0]; // define homepage at 'example.com/#/'
-      arts.undefined = {
-        order: 0,
-        path:  '',
-        tidy:  '',
-        dname: '',
-        title: 'Article Not Found',
-        meta: [],
-        html: ['<h1>Article Not Found</h1>']
-      };
+    //// Run each updater when the page loads, or the URL hash changes. 
+    window.addEventListener('hashchange', onHashchange);
+    onHashchange();
 
 
-      //// Allow articles to be queried '#/with/a/path'. 
-      for (var i=0,l=arts.length; i<l; i++) { arts[ arts[i].tidy ] = arts[i]; }
+    //// Begin injecting plugins. 
+
+    #{config.plugin}
+
+    //// End injecting plugins. 
 
 
-      //// Show the article specified in the URL, when the page loads...
-      window.addEventListener('load', onHashchange);
+    }).call(this, document) });
 
+      </script>
 
-      //// ...and when the URL hash changes. 
-      window.addEventListener('hashchange', onHashchange);
-
-    //
-    """
-      ]
-
-Inject custom functionality, if the `plugin` config field has been set. 
-
-      if config.plugin
-        out = out.concat [
-          '\n  //// Begin plugin code.\n'
-          config.plugin
-          '\n  //// End plugin code.\n'
-        ]
-
-      out.push '}).call(this);'
-      out.join '\n'
+      """
 
 
 

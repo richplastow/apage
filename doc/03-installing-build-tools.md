@@ -1,19 +1,25 @@
+---
+foo: 123
+bar: we're testing two single quotes can't break the attribute
+bar: testing duplicate keys
+---
+
 Installing Build Tools
 ======================
 
-Install [coffee](http://coffeescript.org/) 1.9.1 on the command line: 
+The following modules are listed in the `"devDependencies"` field of 
+‘package.json’, so running `npm install` will install them in the local 
+‘node_modules’ directory. However, you may find it useful to install them 
+globally on your machine, in which case the `-g` flag is your friend: 
+
+Install [coffee](http://coffeescript.org/) 1.9.2 on the command line: 
 ```bash
-sudo npm install -g coffee-script
+npm install -g coffee-script
 ```
 
 Install [nodemon](http://nodemon.io/) 1.3.7: 
 ```bash
-sudo npm install -g nodemon
-```
-
-Install [marked](https://github.com/chjj/marked) 0.3.3: 
-```bash
-sudo npm install -g marked
+npm install -g nodemon
 ```
 
 

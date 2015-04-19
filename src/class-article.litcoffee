@@ -69,10 +69,10 @@ This will usually be a relative path, eg 'doc/03-third-doc-article.md'.
 
 
 
-#### `meta`
-Meta data is optional, and based on [Jeyll frontmatter](http://goo.gl/4l6k2e). 
+#### `front`
+frontmatter is optional, based on [Jeyll frontmatter](http://goo.gl/4l6k2e). @todo validate Jeyll frontmatter style
 
-        @meta = [] # will remain an empty array if no frontmatter is present
+        @front = [] # will remain an empty array if no frontmatter is present
         if '---\n' == @_config.raw.substr 0, 4 # the very top of the file
           @_config.raw = @_config.raw.split '---\n'
           for line,i in @_config.raw[1].split '\n' # each line of frontmatter
@@ -81,9 +81,9 @@ Meta data is optional, and based on [Jeyll frontmatter](http://goo.gl/4l6k2e).
             if 'title' == key
               @title = value
             else
-              @meta[i] = { key:key, value:value }
+              @front.push [ key, value ]
           @_config.raw = (@_config.raw.slice 2).join '---\n'
-          #@todo validate meta
+          #@todo validate front
 
 Trim newlines and extra spaces from the start and end of the raw markdown. 
 
@@ -93,7 +93,7 @@ Trim newlines and extra spaces from the start and end of the raw markdown.
 
 
 #### `title`
-Unless set in meta, article’s `title` is its first line of markdown. 
+Unless set in frontmatter, article’s `title` is its first line of markdown. 
 
         @title = @title || (@_config.raw.split '\n')[0]
 

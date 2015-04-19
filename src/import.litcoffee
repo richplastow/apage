@@ -23,4 +23,13 @@ Otherwise, assume we are in the browser, and modules have already been loaded.
 
 #### Set marked options @todo
 
-    marked.setOptions { }
+Prepare a [custom renderer](http://goo.gl/1NrQ0v). 
+
+    renderer = new marked.Renderer
+    renderer.heading = (text, level) ->
+      "<h#{level}>#{text}</h#{level}>\n"
+    marked.setOptions
+      renderer:renderer
+
+
+
