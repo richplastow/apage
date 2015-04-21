@@ -45,14 +45,16 @@ Returns the html page.
         """
       ]
 
-Begin each article, adding Apage’s standard data attributes. @todo better data-apage-front formatting, esp for long data
+Begin each article, adding Apage’s standard data attributes. 
+@todo better data-apage-front formatting, esp for long data
+@todo is data-apage-opath needed?
 
       for article,i in articles
         id = tidypath article.path
         out.push """
-    <article      id="/#{id}"
+    <article      id="_#{id}"
       data-apage-opath="/#{article.path}"
-      data-apage-dname="/#{dirname article.path}"
+      data-apage-dname="_#{dirname article.path}"
       data-apage-order="#{ordername article.path}"
       data-apage-front='#{(JSON.stringify article.front).replace /'/g,"&#39;"}'
       data-apage-title="#{article.title}"
@@ -66,6 +68,7 @@ Add the article content, and finish the article.
 
 Finish up, and return the page HTML
 
+      out.push '<!-- NB, Apage plugins may inject elements below this line -->'
       out.join('\n  ') + '\n\n</body>\n</html>'
 
 
@@ -263,6 +266,8 @@ Returns a block of CSS for the header.
 
           p, ul, ol { line-height:1.4; }
 
+        /* NB, Apage plugins may inject CSS below this line */
+
       """
 
 
@@ -288,7 +293,9 @@ Return various useful strings, based on an article’s `path`. @todo unit test t
       name = if isNaN order * 1 then name.join '-' else name.slice(1).join '-'
       dirname(p) + name.split('.').slice(0,-1).join '.'
 
-    dirname = (p) -> ªhas p, '/', p.split('/').slice(0,-1).join('/') + '/', ''
+@todo better char than underscore, must be allowed in IDs but not in filenames
+
+    dirname = (p) -> ªhas p, '/', p.split('/').slice(0,-1).join('_') + '_', ''
 
     filename = (p) -> p.split('/').slice(-1)[0]
 
@@ -323,8 +330,9 @@ Render boilerplate Apage JavaScript, and then inject the plugins.
 
 
     //// Initialize two arrays which are available to all Apage plugins. 
-     ,arts = []
-     ,updaters = []
+     ,arts      = []
+     ,resolvers = []
+     ,updaters  = []
 
 
     //// Like jQuery, but native. 
@@ -332,37 +340,41 @@ Render boilerplate Apage JavaScript, and then inject the plugins.
      ,$$ = d.querySelectorAll.bind(d)
 
 
-    //// Get a reference to all `<article class="apage">` elements. 
+    //// Gets a reference to all `<article class="apage">` elements. 
      ,$arts = $$('article.apage')
 
 
-    //// Return a renderable object based on a given query. 
+    //// Runs each resolver in order. These are added by the plugins, below. 
+    //// Resolvers are used to map a query to an article. 
      ,resolve = function (query) {
-        if (! query) { return arts[0]; } // eg '#' or no hash
-        if (arts[query]) { return arts[query]; } // eg '#57' or '#/foo'
-        return arts.undefined; // like a 404 error
+        for (var i=0, l=resolvers.length, backstop, result={}; i<l; i++) {
+          result = resolvers[i](query);
+          if (result.art) { break; } // `query` does resolve to an article
+          backstop = result.backstop || backstop; // may return a backstop
+        }
+        return result.art ? result.art : backstop; //@todo test logic of 'last valid backstop return' with several plugins at once
       }
 
 
-    //// Run each updater in order. These are added by the plugins, below. 
+    //// Runs each updater in order. These are added by the plugins, below. 
+    //// Updaters change the current DOM state, eg to show a single article. 
      ,update = function (query) {
-        var i, l, current = resolve(query);
-        for (i=0, l=updaters.length; i<l; i++) {
+        for (var i=0, l=updaters.length, current=resolve(query); i<l; i++) {
           updaters[i](current);
         }
       }
 
 
-    //// Called when the page loads, and when the URL hash changes. 
+    //// Tidies the URL hash and runs `update()` when the URL hash changes. 
      ,onHashchange = function (event) {
-        update( window.location.hash.substr(1) ); // trim leading '#'
+        update( window.location.hash.substr(1).replace(/\\//g,'_') );
         if (event) { event.preventDefault(); }
       }
 
     ;
 
 
-    //// Populate `arts`, the articles array. 
+    //// Populate the `arts` array using data from our `<ARTICLE>` elements. 
     for (i=0, l=$arts.length; i<l; i++) {
       $ref = $arts[i];
       arts.push({
@@ -377,37 +389,16 @@ Render boilerplate Apage JavaScript, and then inject the plugins.
     }
 
 
-    //// Add the 404 page. 
-    arts.undefined = {
-        id:    ''
-       ,opath: ''
-       ,dname: ''
-       ,order: 0
-       ,front: []
-       ,title: 'Article Not Found'
-       ,$ref:  d.createDocumentFragment()
-    };
-    arts.undefined.$ref.innerHTML = '<h1>Article Not Found</h1>';
-
-
-    //// Add a route to the homepage at 'example.com/#/'. 
-    arts['/'] = arts[0] || arts.undefined;
-
-
-    //// Allow articles to be queried '#/with/a/path'. 
-    for (i=0,l=arts.length; i<l; i++) { arts[ arts[i].tidy ] = arts[i]; }
-
-
-    //// Run each updater when the page loads, or the URL hash changes. 
-    window.addEventListener('hashchange', onHashchange);
-    onHashchange();
-
-
     //// Begin injecting plugins. 
 
     #{config.plugin}
 
     //// End injecting plugins. 
+
+
+    //// Run each updater when the page loads, and when the URL hash changes. 
+    onHashchange();
+    window.addEventListener('hashchange', onHashchange);
 
 
     }).call(this, document) });

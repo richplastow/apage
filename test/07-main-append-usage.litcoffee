@@ -29,11 +29,11 @@ Typical use of `append()` on the `Apage` class.
       (mock) -> mock.append() == mock
 
       "The `path` field is rendered to inline script"
-      5678
+      5736
       (mock) -> mock.append({ path:'abcxyz' }).render().indexOf 'abcxyz'
 
       "Default `html` field is rendered to inline script"
-      5783
+      5841
       (mock) -> mock.render().indexOf '@todo'
 
     ]

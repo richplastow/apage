@@ -1,6 +1,6 @@
 {
   "name": "apage",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "license": "MIT",
   "homepage": "http://apage.richplastow.com/",
   "author": "Rich Plastow <rich@richplastow.com> (http://richplastow.com/)",
@@ -24,6 +24,8 @@
     "doc",
     "documentation",
     "generator",
+    "jekyll",
+    "frontmatter",
     "coffeescript",
     "litcoffee"
   ],
