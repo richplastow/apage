@@ -26,21 +26,11 @@ Returns the html page.
       <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
       <meta name="generator" content="#{ªI} #{ªV} http://apage.richplastow.com/">
       <style>
-        #{style config}
+        /* ‘Inspect Element’ here, for Apage’s injected CSS */
       </style>
     #{script config, articles}
     </head>
     <body>
-
-      <nav class="nav" tabindex="-1" onclick="this.focus()">
-        <div class="container">
-        </div>
-      </nav>
-      <div class="btn btn-sm btn-close">×</div>
-
-      <div class="container">
-        <div class="col content"></div>
-      </div>
 
         """
       ]
@@ -64,211 +54,12 @@ Begin each article, adding Apage’s standard data attributes.
 Add the article content, and finish the article. 
 
         out.push filterLine config, line for line in article.html
-        out.push "</article><!-- #/#{id} -->\n\n"
+        out.push "</article><!-- / #_#{id} -->\n\n"
 
 Finish up, and return the page HTML
 
-      out.push '<!-- NB, Apage plugins may inject elements below this line -->'
+      out.push '<!-- ‘Inspect Element’ here, for Apage’s injected elements -->'
       out.join('\n  ') + '\n\n</body>\n</html>'
-
-
-
-
-#### `style()`
-Returns a block of CSS for the header. 
-
-    style = (config) -> #@todo add custom styles from config
-      """
-      /* normalize.css v3.0.3 | MIT License | github.com/necolas/normalize.css */
-
-          /* Document */
-          html { font-family:sans-serif; -ms-text-size-adjust:100%; -webkit-text-size-adjust:100% }
-          body { margin:0 }
-
-          /* HTML5 */
-          article,aside,details,figcaption,figure,footer,header,hgroup,main,menu,nav,
-          section,summary { display: block }
-          audio,canvas,progress,video { display:inline-block; vertical-align:baseline }
-          audio:not([controls]) { display:none; height:0 }
-          [hidden],template { display:none }
-
-          /* Links */
-          a { background-color:transparent }
-          a:active,a:hover { outline:0 }
-
-          /* Text */
-          abbr[title] { border-bottom: 1px dotted }
-          b, strong { font-weight: bold }
-          dfn { font-style: italic }
-          h1 { font-size: 2em; margin: 0.67em 0 }
-          mark { background: #ff0; color: #000 }
-          small { font-size: 80% }
-          sub,sup { font-size:75%; line-height:0; position:relative; vertical-align:baseline }
-          sup { top: -0.5em }
-          sub { bottom: -0.25em }
-
-          /* Embedded */
-          img { border: 0 }
-          svg:not(:root) { overflow: hidden }
-
-          /* Grouping */
-          figure { margin: 1em 40px }
-          hr { box-sizing: content-box; height: 0 }
-          pre { overflow: auto }
-          code,kbd,pre,samp { font-family:monospace,monospace; font-size:1em }
-
-          /* Forms */
-          button,input,optgroup,select,textarea { color:inherit; font:inherit; margin:0 }
-          button { overflow:visible }
-          button,select { text-transform:none }
-          button,html input[type="button"],input[type="reset"],
-          input[type="submit"] { -webkit-appearance:button; cursor:pointer }
-          button[disabled],html input[disabled] { cursor:default }
-          button::-moz-focus-inner,input::-moz-focus-inner{ border:0; padding:0 }
-          input { line-height:normal }
-          input[type="checkbox"],input[type="radio"] { box-sizing:border-box; padding:0 }
-          input[type="number"]::-webkit-inner-spin-button,
-          input[type="number"]::-webkit-outer-spin-button { height:auto }
-          input[type="search"] { -webkit-appearance:textfield; box-sizing:content-box }
-          input[type="search"]::-webkit-search-cancel-button,
-          input[type="search"]::-webkit-search-decoration { -webkit-appearance:none }
-          fieldset { border:1px solid #c0c0c0; margin:0 2px; padding:0.35em 0.625em 0.75em }
-          legend { border:0; padding:0 }
-          textarea { overflow:auto }
-          optgroup { font-weight:bold }
-
-          /* Tables */
-          table { border-collapse:collapse; border-spacing:0 }
-          td,th { padding:0 }
-
-
-          /* https://raw.githubusercontent.com/owenversteeg/min/gh-pages/compiled/general.css */
-          body,
-          textarea,
-          input,
-          select {
-            background: 0;
-            border-radius: 0;
-            font: 16px sans-serif;
-            margin: 0;
-          }
-          .addon,
-          .btn-sm,
-          .nav,
-          textarea,
-          input,
-          select {
-            outline: 0;
-            font-size: 14px;
-          }
-          .smooth {
-            transition: all .2s;
-          }
-          .btn,
-          .nav a {
-            text-decoration: none;
-          }
-          .container {
-            margin: 0 20px;
-            width: auto;
-          }
-          @media (min-width: 1310px) {
-            .container {
-              margin: auto;
-              width: 1270px;
-            }
-          }
-          .btn,
-          h2 {
-            font-size: 2em;
-          }
-
-
-          /* https://raw.githubusercontent.com/owenversteeg/min/gh-pages/compiled/navbar.css */
-          .nav,
-          .nav .current,
-          .nav a:hover {
-            background: #000;
-            color: #fff;
-          }
-          .nav {
-            height: 24px;
-            padding: 11px 0 15px;
-            /* TODO: migrate to ems (currently we don't use them because of iOS compatibility problems (has to do with unicode icon for close)) */
-            /* Uncomment for animations
-            max-height: 1.5em;
-            */
-          }
-          .nav a {
-            color: #aaa;
-            padding-right: 1em;
-            position: relative;
-            top: -1px;
-          }
-          .nav .pagename {
-            font-size: 22px;
-            top: 1px;
-          }
-          .btn.btn-close {
-            background: #000;
-            float: right;
-            font-size: 25px;
-            margin: -54px 7px;
-            display: none;
-          }
-          @media (max-width: 500px) {
-            .btn.btn-close {
-              display: block;
-            }
-            .nav {
-              /* transition: max-height .5s ease-in-out, height .5s ease-in-out; */
-              overflow: hidden;
-            }
-            .pagename {
-              margin-top: -11px;
-            }
-            .nav:active,
-            .nav:focus {
-              height: auto;
-              /* Necesary for animations
-              max-height: 500px;
-              height: 100%;
-              */
-            }
-            .nav div:before {
-              background: #000;
-              border-bottom: 10px double;
-              border-top: 3px solid;
-              content: '';
-              float: right;
-              height: 4px;
-              position: relative;
-              right: 3px;
-              top: 14px;
-              width: 20px;
-            }
-            .nav a {
-              display: block;
-              padding: .5em 0;
-              width: 50%;
-            }
-          }
-
-          /* Custom Apage: Navigation */
-          .nav .index  { text-transform:uppercase; }
-          .nav .active { color:#fff; }
-
-          /* Custom Apage: Definition List */
-          dl, dt, dd { display:inline-block; margin:0; color:#eee }
-          dl { margin-top: .5rem; padding:.5em 1em .4em; background: #333; border-radius:3px }
-          dt { text-transform:uppercase; font-size: .7rem; }
-          dt:after { content:": " }
-
-          p, ul, ol { line-height:1.4; }
-
-        /* NB, Apage plugins may inject CSS below this line */
-
-      """
 
 
 
@@ -276,9 +67,9 @@ Returns a block of CSS for the header.
 #### `filterLine()` @todo more filtering
 Used by `page()` to localize URLs, so: 'http://foo.io/#bar' becomes '#bar'. 
 
-    filterLine = (config, line) ->
+    filterLine = (config, line) -> #@todo src
       if config.url
-        rx = new RegExp 'href="' + config.url, 'g' #@todo src
+        rx = new RegExp 'href="' + config.url, 'g' #@todo move this to the link renderer in import.litcoffee
         line.replace rx, 'href="'
 
 
@@ -309,7 +100,7 @@ Return various useful strings, based on an article’s `path`. @todo unit test t
 #### `script()`
 Returns a block of JavaScript for the header. 
 
-    script = (config, articles) ->
+    script = (config, articles) -> #@todo pass some config to plugins, eg color palette
 
 No need for any JavaScript if there are no plugins. 
 
@@ -340,8 +131,22 @@ Render boilerplate Apage JavaScript, and then inject the plugins.
      ,$$ = d.querySelectorAll.bind(d)
 
 
-    //// Gets a reference to all `<article class="apage">` elements. 
+    //// Get a reference to all `<article class="apage">` elements. 
      ,$arts = $$('article.apage')
+
+
+    //// Convert JavaScript’s native `arguments` object to an array. 
+     ,getArgs = function (args, offset) {
+        return Array.prototype.slice.call(args, offset || 0);
+     }
+
+
+    //// `unattribute($ref,'data-apage-','opath'...)` removes data attributes. 
+     ,unattribute = function ($ref, prefix) {
+        for ( var i=0, suffs=getArgs(arguments,2), l=suffs.length; i<l; i++ ) {
+          $ref.removeAttribute(prefix + suffs[i]);
+        }
+      }
 
 
     //// Runs each resolver in order. These are added by the plugins, below. 
@@ -374,7 +179,7 @@ Render boilerplate Apage JavaScript, and then inject the plugins.
     ;
 
 
-    //// Populate the `arts` array using data from our `<ARTICLE>` elements. 
+    //// Populate the `arts` array using data from Apage `<ARTICLE>` elements. 
     for (i=0, l=$arts.length; i<l; i++) {
       $ref = $arts[i];
       arts.push({
@@ -386,6 +191,7 @@ Render boilerplate Apage JavaScript, and then inject the plugins.
        ,title: $ref.getAttribute('data-apage-title')
        ,$ref:  $ref
       });
+      unattribute($ref,'data-apage-','opath','dname','order','front','title');
     }
 
 
