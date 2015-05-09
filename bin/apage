@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 
-/*! apage CLI 0.0.12 //// MIT Licence //// http://apage.richplastow.com/ */
+/*! apage CLI 0.0.13 //// MIT Licence //// http://apage.richplastow.com/ */
 
 !function (root) { 'use strict';
 
 
     //// Define constants.
     var I     = 'apage'
-      , V     = '0.0.12'
+      , V     = '0.0.13'
 
 
     //// Load Node modules and Apage.
@@ -151,9 +151,9 @@
             //// Append each article to the page.
             for (i=0; i<articleTally; i++) {
                 try {
-                    apage.append( articles[i] );
+                    apage.add( articles[i] );
                 } catch (e) {
-                    return exit(3, "Error in '" + articles[i].input + "':", e);
+                    return exit(3, "Error in '" + articles[i].input + "'", e);
                 }
             }
 

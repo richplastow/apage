@@ -1,10 +1,10 @@
-`Apage` Constructor Usage
+01 Main Constructor Usage
 =========================
 
 Typical instantiation of the `Apage` class (called `Main` internally). 
 
 
-    tudor.page    "`Apage` Constructor Usage"
+    tudor.page    "01 Main Constructor Usage"
 
     tudor.section "No `config` Argument"
 

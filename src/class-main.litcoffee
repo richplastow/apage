@@ -54,7 +54,8 @@ The instance configuration. Use `config()` to get and set it.
 
 
 #### `_articles`
-The page or site content. Use `append()` to add an article to it. @todo allow CRUD
+The page or site content. Use `browse()`, `read()`, `edit()`, `add()` and 
+`destroy()`, to perform [BREAD operations](http://goo.gl/pJ6ME5) on it. 
 
         @_articles = []
 
@@ -119,12 +120,30 @@ invalid the whole operation fails, so `a`’s value remains unchanged.
 
 
 
-#### `append()`
+#### `browse()`
+Returns an array summarising the current articles. @todo filter/search, paginate, customize returned objects
+
+      browse: () -> ((a)->{id:a.id,order:a.order})(a) for a in @_articles
+
+
+
+
+#### `add()`
 Adds an article to `_articles`. Throws an error if `article` is invalid. 
 
-      append: (article) ->
+      add: (article) ->
         if ! article then return @
-        @_articles.push new Article article
+        instance = new Article article
+        if @_articles[instance.id]
+          throw new Error "'#{instance.id}' already exists"
+        @_articles.push instance #@todo reorder
+        @_articles.sort (a, b) ->
+          if a.order > b.order then return 1
+          if a.order < b.order then return -1
+          if a.id    > b.id    then return 1 # identical order-numbers
+          if a.id    < b.id    then return -1
+          0 # probably not possible, since IDs are unique @todo is it possible?
+        @_articles[instance.id] = instance
         @ # allow chaining
 
 

@@ -67,12 +67,14 @@ Add a route to the 0th article which catches '/', eg 'http://example.com/#/'.
 Resolver
 --------
 
-Add the `pagination` plugin’s resolver function to Apage’s list of resolvers. 
+Add the `Pagination` plugin’s resolver function to Apage’s list of resolvers. 
 
     resolvers.push (query) ->
 
         if ! query     then return { art: arts[0] }     # eg '#' or no hash
-        if arts[query] then return { art: arts[query] } # eg '#57' or '#/foo'
+        if arts[query] then return { art: arts[query] } # eg '#57'
+        query = 'apage' + query
+        if arts[query] then return { art: arts[query] } # eg '#/apage_foo'
         { backstop: arts.undefined } # like a 404 error
 
 
@@ -81,16 +83,20 @@ Add the `pagination` plugin’s resolver function to Apage’s list of resolvers
 Updater
 -------
 
-Add the `pagination` plugin’s updater function to Apage’s list of updaters. 
+Add the `Pagination` plugin’s updater function to Apage’s list of updaters. 
 
     updaters.push (current) ->
 
-Remove the `active` class from all articles, and then add it to the current 
-article. The CSS injected above hides all articles except the `active` one. 
+When called, this updater appends the `active` class to the current article, 
+and removes the `active` class from all others. The CSS injected by this plugin 
+will then hide all articles except the current one. 
 
       for art in arts
-        art.$ref.className = art.$ref.className.replace /\s*active|\s*$/g, ''
+        art.$ref.className = art.$ref.className.replace /\s*active|\s*$/g, '' #@todo better regexp
       current.$ref.className += ' active'
+
+Update the document title, which is usually visible at the very top of the 
+browser window, and is also used in the browser’s ‘History’ menu. 
 
       d.title = current.title
 

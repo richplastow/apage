@@ -22,6 +22,15 @@ A handy shortcut for `console.log()`. Note [`bind()`](http://goo.gl/66ffgl).
 
 
 
+#### `ªex()`
+Exchanges a character from one set for its equivalent in another. To decompose 
+an accent, use `ªex(c, 'àáäâèéëêìíïîòóöôùúüûñç', 'aaaaeeeeiiiioooouuuunc')`
+
+    ªex = (x, a, b) -> if -1 == pos = a.indexOf x then x else b.charAt pos
+
+
+
+
 #### `ªhas()`
 Determines whether haystack contains a given needle. @todo arrays and objects
 
@@ -39,6 +48,7 @@ when the variable being tested does not exist, `typeof foobar` will return
 
     ªtype = (x) ->
       ({}).toString.call(x).match(/\s([a-z|A-Z]+)/)[1].toLowerCase()
+
 
 
 

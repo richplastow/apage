@@ -1,10 +1,10 @@
-`apage.config()` Usage
-======================
+03 `apage.config()` Usage
+=========================
 
 Typical use of `config()` on the `Apage` class. 
 
 
-    tudor.page    "`apage.config()` Usage"
+    tudor.page    "03 `apage.config()` Usage"
 
     tudor.section "No argument"
 
@@ -99,5 +99,5 @@ Typical use of `config()` on the `Apage` class.
     ]
 
     #@todo test the `url` config field
-
+    #@todo test the `plugin` config field
 

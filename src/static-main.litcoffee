@@ -17,6 +17,14 @@ hidden from code defined elsewhere. They are characterized as follows:
 Returns the html page. 
 
     page = (config, articles) ->
+
+      generator = "#{ªI} #{ªV} http://apage.richplastow.com/"
+
+      comment = if config.plugin
+        '‘Inspect Element’ here, for Apage’s injected CSS'
+      else
+        'Apage was configured with no plugins, so no CSS is injected here'
+
       out = [
         """
     <!DOCTYPE html>
@@ -24,9 +32,9 @@ Returns the html page.
     <head>
       <title>#{config.title}</title>
       <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
-      <meta name="generator" content="#{ªI} #{ªV} http://apage.richplastow.com/">
+      <meta name="generator" content="#{generator}">
       <style>
-        /* ‘Inspect Element’ here, for Apage’s injected CSS */
+        /* #{comment} */
       </style>
     #{script config, articles}
     </head>
@@ -35,30 +43,38 @@ Returns the html page.
         """
       ]
 
-Begin each article, adding Apage’s standard data attributes. 
+Deal with a page which contains no articles. 
+
+      if ! articles.length
+        out.push '<!-- Apage was rendered with no articles -->\n'
+
+Otherwise, begin each article, adding Apage’s standard data attributes. 
 @todo better data-apage-front formatting, esp for long data
 @todo is data-apage-opath needed?
 
       for article,i in articles
-        id = tidypath article.path
         out.push """
-    <article      id="_#{id}"
+    <article id="#{article.id}"
+            class="apage"
       data-apage-opath="/#{article.path}"
       data-apage-dname="_#{dirname article.path}"
-      data-apage-order="#{ordername article.path}"
+      data-apage-order="#{article.order}"
       data-apage-front='#{(JSON.stringify article.front).replace /'/g,"&#39;"}'
-      data-apage-title="#{article.title}"
-                 class="apage">
+      data-apage-title="#{article.title}">
         """
 
 Add the article content, and finish the article. 
 
         out.push filterLine config, line for line in article.html
-        out.push "</article><!-- / #_#{id} -->\n\n"
+        out.push "</article><!-- / ##{article.id} -->\n\n"
 
 Finish up, and return the page HTML
 
-      out.push '<!-- ‘Inspect Element’ here, for Apage’s injected elements -->'
+      comment = if config.plugin
+        '‘Inspect Element’ here, for Apage’s injected elements'
+      else
+        'Apage was configured with no plugins, so nothing is injected here'
+      out.push "<!-- #{comment} -->"
       out.join('\n  ') + '\n\n</body>\n</html>'
 
 
@@ -71,6 +87,8 @@ Used by `page()` to localize URLs, so: 'http://foo.io/#bar' becomes '#bar'.
       if config.url
         rx = new RegExp 'href="' + config.url, 'g' #@todo move this to the link renderer in import.litcoffee
         line.replace rx, 'href="'
+      else
+        line
 
 
 
@@ -81,10 +99,8 @@ Return various useful strings, based on an article’s `path`. @todo unit test t
     tidypath = (p) ->
       name = filename(p).split '-'
       order = name[0]
-      name = if isNaN order * 1 then name.join '-' else name.slice(1).join '-'
+      name = if isNaN order*1 then name.join '-' else name.slice(1).join '-'
       dirname(p) + name.split('.').slice(0,-1).join '.'
-
-@todo better char than underscore, must be allowed in IDs but not in filenames
 
     dirname = (p) -> ªhas p, '/', p.split('/').slice(0,-1).join('_') + '_', ''
 
@@ -92,7 +108,7 @@ Return various useful strings, based on an article’s `path`. @todo unit test t
 
     ordername = (p) ->
       order = filename(p).split('-')[0]
-      if isNaN order * 1 then "'#{order}'" else order * 1
+      if isNaN order*1 then '' else order*1
 
 
 

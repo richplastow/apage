@@ -1,10 +1,10 @@
-`Apage` Constructor Errors
-==========================
+02 `Apage` Constructor Errors
+=============================
 
 Instantiation of the `Apage` class which leads to an exception being thrown. 
 
 
-    tudor.page    "`Apage` Constructor Errors"
+    tudor.page    "02 `Apage` Constructor Errors"
 
     tudor.section "Invalid `config` Argument"
 
@@ -45,4 +45,3 @@ Instantiation of the `Apage` class which leads to an exception being thrown.
       -> new Main { title:'tab character: \t' }
 
     ]
-
