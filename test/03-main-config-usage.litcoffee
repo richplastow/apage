@@ -1,16 +1,16 @@
-03 `apage.config()` Usage
-=========================
-
 Typical use of `config()` on the `Apage` class. 
 
+    tudor.add [
+      "03 `apage.config()` Usage"
 
-    tudor.page    "03 `apage.config()` Usage"
 
-    tudor.section "No argument"
 
-    tudor.is [
 
+      "No argument"
       -> new Main
+
+
+      tudor.is
 
       "`config()` is a function"
       ªF
@@ -20,9 +20,8 @@ Typical use of `config()` on the `Apage` class.
       ªO
       (mock) -> mock.config()
 
-    ]
 
-    tudor.equal [
+      tudor.equal
 
       "Returned object contains expected defaults"
       '{"title":"Untitled","url":false,"plugin":""}'
@@ -32,11 +31,11 @@ Typical use of `config()` on the `Apage` class.
       false
       (mock) -> mock.config() == mock.config()
 
-    ]
 
-    tudor.section "Retrieve a config value"
 
-    tudor.equal [
+
+      "Retrieve a config value"
+
 
       "Default `title` is 'Untitled'"
       'Untitled'
@@ -52,11 +51,11 @@ Typical use of `config()` on the `Apage` class.
       undefined
       (mock) -> mock.config 'unrecognized'
 
-    ]
 
-    tudor.section "Set a valid config value"
 
-    tudor.equal [
+
+      "Set a valid config value"
+
 
       "Set a Chinese `title`, two arg syntax, returns `undefined`"
       undefined
@@ -74,19 +73,19 @@ Typical use of `config()` on the `Apage` class.
       'Γλωσσική Εκμὰθηση'
       (mock) -> mock.config 'title'
 
-    ]
 
-    tudor.section "Set an invalid config value"
 
-    tudor.is [
+
+      "Set an invalid config value"
+
+      tudor.is
 
       "Returns an array"
       ªA
       (mock) -> mock.config 'title', ''
 
-    ]
 
-    tudor.equal [
+      tudor.equal
 
       "The array has one element"
       1

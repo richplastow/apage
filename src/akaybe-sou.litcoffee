@@ -1,7 +1,7 @@
 Akaybe Simple Object Utilities
 ==============================
 
-#### A collection of functions which operate on simple objects. 
+#### Functions which operate on simple objects. 
 
 A ‘simple object’ is defined as a standard JavaScript object created using the 
 `{}` syntax, whose values are any of the following types: 
@@ -85,12 +85,12 @@ Return `undefined`, to signify no errors were encountered.
 
 
 #### `ªclone()`
-Uses an array of rules (see `ªpopulate()` above) to clone `subject`. 
+Uses an array of keys or rules (see `ªpopulate()` above) to clone `subject`. 
 
     ªclone = (subject, rules) ->
       out = {}
       for rule in rules
-        key = rule[0]
+        key = if ªS == typeof rule then rule else rule[0]
         out[key] = subject[key]
       out
 

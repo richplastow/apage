@@ -1,14 +1,16 @@
-02 `Apage` Constructor Errors
-=============================
-
 Instantiation of the `Apage` class which leads to an exception being thrown. 
 
+    tudor.add [
+      "02 `Apage` Constructor Errors"
 
-    tudor.page    "02 `Apage` Constructor Errors"
 
-    tudor.section "Invalid `config` Argument"
 
-    tudor.throws [
+
+      "Invalid `config` argument"
+      -> new Main
+
+
+      tudor.throw
 
       "`config` is not an object"
       "Invalid `config`:\n  `candidate` is type 'number' not 'object'"
@@ -22,11 +24,11 @@ Instantiation of the `Apage` class which leads to an exception being thrown.
       "Invalid `config`:\n  `candidate` is type 'string' not 'object'"
       -> new Main new String 'yikes!'
 
-    ]
 
-    tudor.section "Invalid `config.title`"
 
-    tudor.throws [
+
+      "Invalid `config.title`"
+
 
       "A number"
       "Invalid `config`:\n  Field 'title' is type 'number' not 'string'"

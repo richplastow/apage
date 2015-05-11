@@ -1,16 +1,16 @@
-05 `apage.render()` Usage
-=========================
-
 Typical use of `render()` on the `Apage` class. 
 
+    tudor.add [
+      "05 `apage.render()` Usage"
 
-    tudor.page    "05 `apage.render()` Usage"
+    
 
-    tudor.section "No argument"
 
-    tudor.is [
-
+      "No argument"
       -> new Main
+
+
+      tudor.is
 
       "`render()` is a function"
       ªF
@@ -20,9 +20,8 @@ Typical use of `render()` on the `Apage` class.
       ªS
       (mock) -> mock.render()
 
-    ]
 
-    tudor.equal [
+      tudor.equal
 
       "Returned string is expected length"
       468
@@ -45,7 +44,7 @@ Typical use of `render()` on the `Apage` class.
       """
       </title>
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
-        <meta name="generator" content="Apage 0.0.13 http://apage.richplastow.com/">
+        <meta name="generator" content="Apage #{ªV} http://apage.richplastow.com/">
         <style>
           /* Apage was configured with no plugins, so no CSS is injected here */
         </style>

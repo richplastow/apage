@@ -13,7 +13,7 @@ Define the `Tudor` class
       I: 'Tudor'
       toString: -> "[object #{I}]"
 
-      jobs: []
+      articles: []
 
 
 
@@ -24,28 +24,89 @@ Define the constructor
       constructor: (@opt={}) ->
         switch @opt.format
           when 'html'
-            @header = (summary) -> """
+            @pageHead = (summary) -> """
               <style>
-                 b.pass   { color: #393 }
-                 b.fail   { color: #933 }
-                 div      { padding: .5em; }
-                 div.fn   { background-color: #ccc }
-                 div.pass { background-color: #cfc }
-                 div.fail { background-color: #fcc }
+                body     { font-family: sans-serif; }
+                a        { outline: 0; }
+                b        { display: inline-block; width: .7em }
+
+                b.pass              { color: #393 }
+                b.fail              { color: #bbb }
+                article.fail b.pass { color: #bbb }
+                section.fail b.pass { color: #bbb }
+
+                pre      { padding: .5em; margin: .2em 0; border-radius: 4px; }
+                pre.fn   { background-color: #fde }
+                pre.pass { background-color: #cfc }
+                pre.fail { background-color: #d8e0e8 }
+
+                article  { margin-bottom: .5rem }
+                article h2 { padding-left:.5rem; margin:0; font-weight:normal }
+                article.pass { border-left: 5px solid #9c9 }
+                article.fail { border-left: 5px solid #9bf }
+                article.fail h2 { margin-bottom: .5rem }
+                article.pass >div { display: none }
+
+                section  { margin-bottom: .5rem }
+                section h3   { padding-left: .5rem; margin: 0; }
+                section.pass { border-left: 3px solid #9c9 }
+                section.fail { border-left: 3px solid #9bf }
+                section.fail h3 { margin-bottom: .5rem }
+                section.pass >div { display: none }
+
+                article.fail section.pass { border-left-color: #ccc }
+
+                div      { padding-left: .5em; }
+                div.fail { border-left: 3px solid #9bf; font-size: .8rem }
+                div h4   { margin: 0 }
+                div h4 { font: normal .8rem/1.2rem monaco, monospace }
+                div.fail, div.fail h4 { margin: .5rem 0 }
+
               </style>
-              <a href="#end" id="top">\u2b07</a>  #{summary}
+              <h4><a href="#end" id="top">\u2b07</a>  #{summary}</h4>
               """
-            @footer = (summary) -> """
-              \n<a href="#top" id="end">\u2b06</a>  #{summary}
+            @pageFoot = (summary) -> """
+              <h4><a href="#top" id="end">\u2b06</a>  #{summary}</h4>
               <script>
                 document.title='#{summary.replace /<\/?[^>]+>/g,''}';
               </script>
               """
-            @tick   = '<b class="pass">\u2713</b>' # Unicode CHECK MARK
-            @cross  = '<b class="fail">\u2718</b>' # Unicode HEAVY BALLOT X
+            @articleHead = (heading, fail) ->
+                "<article class=\"#{if fail then 'fail' else 'pass'}\">" +
+                "<h2>#{if fail then @cross else @tick}#{heading}</h2><div>"
+            @articleFoot = '</div></article>'
+            @sectionHead = (heading, fail) ->
+                "<section class=\"#{if fail then 'fail' else 'pass'}\">" +
+                "<h3>#{if fail then @cross else @tick}#{heading}</h3><div>"
+            @sectionFoot = '</div></section>'
+            @jobFormat = (heading, result) ->
+                "<div class=\"#{if result then 'fail' else 'pass'}\">" +
+                "<h4>#{if result then @cross else @tick}#{heading}</h4>" + 
+                "#{if result then @formatError result else ''}" +
+                "</div>"
+            @tick   = '<b class="pass">\u2713</b> ' # Unicode CHECK MARK
+            @cross  = '<b class="fail">\u2718</b> ' # Unicode HEAVY BALLOT X
           else
-            @header = (summary) ->   "\u2b07  #{summary}"
-            @footer = (summary) -> "\n\u2b06  #{summary}"
+            @pageHead = (summary) ->   "#{summary}"
+            @pageFoot = (summary) -> "\n#{summary}"
+            @articleHead = (heading, fail) -> """
+            
+            #{if fail then @cross else @tick} #{heading}
+            ===#{new Array(heading.length).join '='}
+
+            """
+            @articleFoot = ''
+            @sectionHead = (heading, fail) -> """
+
+            #{if fail then @cross else @tick} #{heading}
+            ---#{new Array(heading.length).join '-'}
+
+            """
+            @sectionFoot = ''
+            @jobFormat = (heading, result) ->
+                "#{if result then @cross else @tick} #{heading}" +
+                "#{if result then '\n' + @formatError result else ''}"
+            @jobFoot = ''
             @tick   =   '\u2713' # Unicode CHECK MARK
             @cross  =   '\u2718' # Unicode HEAVY BALLOT X
 
@@ -55,100 +116,188 @@ Define the constructor
 Define public methods
 ---------------------
 
+#### `add()`
+Add a new article to the page. An article must contain at least one section. 
+
+      add: (lines) ->
+
+Create the `article` object and initialize `runner` and `section`. 
+
+        article = { sections:[] }
+        runner = null
+        section = null
+
+Run some basic validation on the `lines` array. 
+
+        if ªA != ªtype lines then throw new Error "`lines` isn’t an array"
+        if 0 == lines.length then throw new Error "`lines` has no elements"
+        if ªS != ªtype lines[0] then throw new Error "`lines[0]` isn’t a string"
+
+Add the article heading. 
+
+        article.heading = lines.shift()
+
+Step through each line, populating the `article` object as we go. 
+
+        i = 0
+        while i < lines.length
+          line = lines[i]
+          switch ªtype line
+
+Change the current assertion-runner. 
+
+            when ªO
+              if ! line.runner then throw new Error "Errant object" #@todo better error message
+              runner = line.runner
+
+Record a mock-modifier. 
+
+            when ªF
+              section.jobs.push line
+
+            when ªS
+
+A string might signify a new assertion in the current section... 
+
+              if @isAssertion lines[i+1], lines[i+2]
+                if ! section then throw new Error "Cannot add an assertion here"
+                section.jobs.push [
+                  runner     # <function>  runner  Function to run the assertion
+                  line       # <string>    name    A short description
+                  lines[++i] # <mixed>     expect  Defines success
+                  lines[++i] # <function>  actual  Produces the result to test
+                ]
+
+...or the beginning of a new section. 
+
+              else
+                section = {
+                  heading: line
+                  jobs: []
+                }
+                article.sections.push section
+
+          i++
+
+Append the article to the `articles` array.
+
+        @articles.push article
+
+
+
+
 #### `do()`
 Run the test and return the result. 
 
       do: =>
-        md = [] # initialize markdown lines
-        passed = failed = 0
+
+Initialize the output array, as well as `mock` and the page pass/fail tallies. 
+
+        pge = []
         mock = null
-        for job in @jobs
-          switch ªtype job
-            when ªF # a mock-modifier
-              try mock = job mock catch e then error = e.message
-              if error then md.push @formatMockModifierError job, error
-            when ªS # a '- - -' rule, or a page or section heading
-              md.push @sanitize job
-            when ªA # assertion in the form `[ runner, name, expect, actual ]`
-              [ runner, name, expect, actual ] = job # dereference
-              result = runner(expect, actual, mock) # run the test
-              if ! result
-                md.push "#{@tick} #{@sanitize name}  "
-                passed++
-              else
-                md.push "#{@cross} #{@sanitize name}  "
-                md.push result
-                failed++
+        pgePass = pgeFail = 0
 
-Generate a summary message. 
+        for article in @articles
+          art = []
+          artPass = artFail = 0
 
-          summary = if failed
-            "FAILED #{failed}/#{passed + failed} #{@cross}"
+          for section in article.sections
+            sec = []
+            secPass = secFail = 0
+
+            for job in section.jobs
+              switch ªtype job
+                when ªF # a mock-modifier
+                  try mock = job mock catch e then error = e.message
+                  if error then out.push @formatMockModifierError job, error
+                when ªA # assertion in the form `[ runner, name, expect, actual ]`
+                  [ runner, heading, expect, actual ] = job # dereference
+                  result = runner expect, actual, mock # run the test
+                  if ! result
+                    sec.push @jobFormat "#{@sanitize heading}" 
+                    pgePass++
+                    artPass++
+                    secPass++
+                  else
+                    sec.push @jobFormat "#{@sanitize heading}", result
+                    pgeFail++
+                    artFail++
+                    secFail++
+
+            sec.unshift @sectionHead "#{@sanitize section.heading}", secFail
+            sec.push @sectionFoot
+            art = art.concat sec
+
+Xx. 
+
+          art.unshift @articleHead "#{@sanitize article.heading}", artFail
+          art.push @articleFoot
+          pge = pge.concat art
+
+Generate a page summary message. 
+
+          summary = if pgeFail
+            "#{@cross} FAILED #{pgeFail}/#{pgePass + pgeFail}"
           else
-            "Passed #{passed}/#{passed + failed} #{@tick}"
+            "#{@tick} Passed #{pgePass}/#{pgePass + pgeFail}"
 
 Return the result as a string, with summary at the start and end. 
 
-        md.unshift @header summary
-        md.push    @footer summary
-        md.join '\n'
+        pge.unshift @pageHead summary
+        pge.push    @pageFoot summary
+        pge.join '\n'
 
 
 
 
-#### `page()`
-Add a page heading. 
+#### `formatError()`
+Format an exception or fail result. `result` should be an array with two, three 
+or four elements. 
 
-      page: (text) ->
-        @jobs.push "\n\n#{text}\n=" + ( new Array(text.length).join '=' )
+      formatError: (result) ->
+        switch "#{result.length}-#{@opt.format}"
 
+To format an exception, the elements are intro text and an error object. 
 
-
-
-#### `section()`
-Add a section heading. 
-
-      section: (text) ->
-        @jobs.push "\n\n#{text}\n-" + ( new Array(text.length).join '-' ) + '\n'
-
-
-
-
-#### `formatFail()`
-Format a typical fail message. 
-
-      formatFail: (result, delivery, expect, types) ->
-        if types
-          result = "#{result} (#{ªtype result})"
-          expect = "#{expect} (#{ªtype expect})"
-        switch @opt.format
-          when 'html' then """
-            <div class="fail">#{@sanitize @reveal result}</div>
-            ...was #{delivery}, but expected...
-            <div class="pass">#{@sanitize @reveal expect}</div>
+          when '2-html' then """
+            #{result[0]}
+            <pre class="fail">#{@sanitize result[1].message}</pre>
             """
-          else """
-            #{@sanitize @reveal result}
-            ...was #{delivery}, but expected...
-            #{@sanitize @reveal expect}
+          when '2-plain' then """
+            #{result[0]}
+            #{@sanitize result[1].message}
             """
 
+To format an normal fail, the elements are 'actual', 'delivery' and 'expected'. 
 
-
-
-#### `formatException()`
-Format an exception message. 
-
-      formatException: (intro, error) ->
-        switch @opt.format
-          when 'html' then """
-            #{intro}
-            <div class="fail">#{@sanitize error.message}</div>
+          when '3-html' then """
+            <pre class="fail">#{@sanitize @reveal result[0]}</pre>
+            ...was #{result[1]}, but expected...
+            <pre class="pass">#{@sanitize @reveal result[2]}</pre>
             """
-          else """
-            #{intro}
-            #{@sanitize error.message}
+          when '3-plain' then """
+            #{@sanitize @reveal result[0]}
+            ...was #{result[1]}, but expected...
+            #{@sanitize @reveal result[2]}
             """
+
+A fourth element (of any kind) signifies the fail is just a type-difference. 
+
+          when '4-html' then """
+            <pre class="fail">#{@sanitize @reveal result[0]} (#{ªtype result[0]})</pre>
+            ...was #{result[1]}, but expected...
+            <pre class="pass">#{@sanitize @reveal result[2]} (#{ªtype result[2]})</pre>
+            """
+          when '4-plain' then """
+            #{@sanitize @reveal result[0]} (#{ªtype result[0]})
+            ...was #{result[1]}, but expected...
+            #{@sanitize @reveal result[2]} (#{ªtype result[2]})
+            """
+
+Any other number of elements is invalid. 
+
+          else
+            throw new Error "Cannot process '#{result.length}-#{@opt.format}'"
 
 
 
@@ -159,9 +308,9 @@ Format an exception message encountered by a mock-modifier function.
       formatMockModifierError: (fn, error) ->
         switch @opt.format
           when 'html' then """
-            <div class="fn">#{@sanitize fn+''}</div>
+            <pre class="fn">#{@sanitize fn+''}</pre>
             ...encountered an exception:
-            <div class="fail">#{@sanitize error}</div>
+            <pre class="fail">#{@sanitize error}</pre>
             """
           else """
             #{@sanitize fn+''}
@@ -195,38 +344,17 @@ Escape a string for display, depending on the current `format` option.
 
 
 
-#### `custom()`
-Schedule a list of assertions which all use a single assertion-runner. 
-
-      custom: (al, runner) ->
-        i = 0
-        while i < al.length
-          if ªF == ªtype al[i] # the assert-list element is a mock-modifier...
-            @jobs.push al[i]
-          else # ...or is the first of three elements which define an assertion
-            @jobs.push [
-              runner  # <function>  runner  Function to run the assertion
-              al[i]   # <string>    name    Short description of the assertion
-              al[++i] # <mixed>     expect  Defines a successful assertion
-              al[++i] # <function>  actual  Produces the result to assertion
-            ]
-          i++
-        @jobs.push '- - -' # http://goo.gl/TWH3W3
-
-
-
-
-#### `throws()`
+#### `throw()`
 An assertion-runner which expects `actual()` to throw an exception. 
 
-      throws: (al) ->
-        @custom al, (expect, actual, mock) =>
+      throw:
+        runner: (expect, actual, mock) ->
           error = false
           try actual mock catch e then error = e
           if ! error
-            @formatException 'No exception thrown, expected', expect
+            [ 'No exception thrown, expected', expect ]
           else if expect != error.message
-            @formatFail error.message, 'thrown', expect
+            [ error.message, 'thrown', expect ]
 
 
 
@@ -234,14 +362,17 @@ An assertion-runner which expects `actual()` to throw an exception.
 #### `equal()`
 An assertion-runner which expects `actual()` and `expect` to be equal. 
 
-      equal: (al) ->
-        @custom al, (expect, actual, mock) =>
+      equal: 
+        runner: (expect, actual, mock) ->
           error = false
           try result = actual mock catch e then error = e
           if error
-            @formatException 'Unexpected exception', error
+            [ 'Unexpected exception', error ]
           else if expect != result
-            @formatFail result, 'returned', expect, (result+'' == expect+'')
+            if result+'' == expect+''
+              [ result, 'returned', expect, true ]
+            else
+              [ result, 'returned', expect ]
 
 
 
@@ -249,14 +380,27 @@ An assertion-runner which expects `actual()` and `expect` to be equal.
 #### `is()`
 An assertion-runner which expects `ªtype( actual() )` and `expect` to be equal. 
 
-      is: (al) ->
-        @custom al, (expect, actual, mock) =>
+      is: 
+        runner: (expect, actual, mock) ->
           error = false
           try result = actual mock catch e then error = e
           if error
-            @formatException 'Unexpected exception', error
+            [ 'Unexpected exception', error ]
           else if expect != ªtype result
-            @formatFail "type #{ªtype result}", 'returned', "type #{expect}"
+            [ "type #{ªtype result}", 'returned', "type #{expect}" ]
+
+
+
+
+#### `isAssertion()`
+Xx. @todo
+Note brackets around `ªO == ªtype line1`, which makes this conditional behave 
+as expected! 
+
+      isAssertion: (line1, line2) ->
+        if ªF != ªtype line2 then return false
+        if (ªO == ªtype line1) && ªF == ªtype line1.runner then return false
+        true
 
 
 
@@ -275,7 +419,6 @@ this module can run its assertions. In Node, for example:
 `require('foo').runTest();`
 
     Main.runTest = tudor.do
-
 
 
 

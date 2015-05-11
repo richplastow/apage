@@ -1,13 +1,16 @@
-07 `apage.add()` and `apage.browse()` Typical Usage
-===================================================
+Xx. @todo intro
 
-    tudor.page "07 `apage.add()` and `apage.browse()` Typical Usage"
+    tudor.add [
+      "07 `apage.add()` and `apage.browse()` Typical Usage"
 
-    tudor.section "Basic checks and usage, with zero articles"
 
-    tudor.is [
 
+
+      "Basic checks and usage, with zero articles"
       -> new Main
+
+
+      tudor.is
 
       "`add()` is a function"
       ªF
@@ -29,9 +32,8 @@
       ªU
       (mock) -> a = mock.browse(); a.foo = 1; mock.browse().foo
 
-    ]
 
-    tudor.equal [
+      tudor.equal
 
       "Returned `add()` object is the instance itself"
       true
@@ -41,11 +43,10 @@
       0
       (mock) -> mock.browse().length
 
-    ]
 
-    tudor.section "Appending some articles"
 
-    tudor.equal [
+
+      "Adding some articles"
 
 
       "A very minimal article with numeric name"

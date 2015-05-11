@@ -1,34 +1,35 @@
-10 `apage.add()` Errors
-=======================
-
 Use of the `Apage` class’s `add()` method which leads to an exception. 
 
+    tudor.add [
+      "10 `apage.add()` Errors"
 
-    tudor.page    "10 `apage.add()` Errors"
 
-    tudor.section "Invalid `article` argument"
 
-    tudor.throws [
 
+      "Invalid `article` argument"
       -> new Main
+
+
+      tudor.throw
 
       "`config` is a number"
       "Invalid `config`:\n  `candidate` is type 'number' not 'object'"
       (mock) -> mock.add 456
 
-    ]
 
-    tudor.equal [
+      tudor.equal
 
       "Invalid object is not added"
       0
       (mock) -> mock.browse().length
 
-    ]
 
-    tudor.section "Invalid `path` field"
 
-    tudor.throws [
+
+      "Invalid `path` field"
+
+
+      tudor.throw
 
       "`path` is not set"
       "Invalid `config`:\n  Missing field 'path' is mandatory"
@@ -64,11 +65,11 @@ Use of the `Apage` class’s `add()` method which leads to an exception.
 
       #@todo duplicate path not allowed
 
-    ]
 
-    tudor.section "Invalid `raw` field"
 
-    tudor.throws [
+
+      "Invalid `raw` field"
+
 
       "`raw` is an object"
       "Invalid `config`:\n  Field 'raw' is type 'object' not 'string'"
@@ -82,9 +83,8 @@ Use of the `Apage` class’s `add()` method which leads to an exception.
       "Invalid `config`:\n  Field 'raw' fails /^[^\\x00-\\x08\\x0E-\\x1F]{0,10000}$/"
       (mock) -> mock.add { path:'b.md', raw:'x\bz' }
 
-    ]
 
-    tudor.equal [
+      tudor.equal
 
       "Invalid objects still not added"
       1 # just '00-A.txt', above 

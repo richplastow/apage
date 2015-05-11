@@ -1,28 +1,27 @@
-01 Main Constructor Usage
-=========================
-
 Typical instantiation of the `Apage` class (called `Main` internally). 
 
+    tudor.add [
+      "01 Main Constructor Usage"
 
-    tudor.page    "01 Main Constructor Usage"
 
-    tudor.section "No `config` Argument"
 
-    tudor.is [
+
+      "No `config` Argument"
+      -> new Main
+
+
+      tudor.is
 
       "Class is a function"
       ªF
       -> Main
 
-      -> new Main
-
       "Instance is an object"
       ªO
       (mock) -> mock
 
-    ]
 
-    tudor.equal [
+      tudor.equal
 
       "`toString()` is '[object Apage]'"
       '[object Apage]'
@@ -32,19 +31,16 @@ Typical instantiation of the `Apage` class (called `Main` internally).
       '[object Apage]'
       -> '' + new Main null
 
-    ]
 
-    tudor.section "Basic `config`"
 
-    tudor.equal [
+
+      "Basic `config`"
+
 
       "Set the title"
       '[object Apage]'
       -> '' + new Main { title:'Café' }
 
+
     ]
-
-
-
-
 

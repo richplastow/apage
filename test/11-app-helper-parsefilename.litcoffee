@@ -1,22 +1,22 @@
-11 App Helpers, Errors and Usag: `parseFilename()`
-===================================================
-
 Use of the private static function `parseFilename()`. 
 
+    tudor.add [
+      "11 App Helpers, Errors and Usage: `parseFilename()`"
 
-    tudor.page    "11 App Helpers, Errors and Usage: `parseFilename()`"
 
-    tudor.section "Basic checks and errors"
 
-    tudor.is [
+
+      "Basic checks and errors"
+
+
+      tudor.is
 
       "`parseFilename()` is a function"
       ªF
       -> parseFilename
 
-    ]
 
-    tudor.throws [
+      tudor.throw
 
       "Called with no arguments"
       '`nm` is undefined, not string'
@@ -30,11 +30,16 @@ Use of the private static function `parseFilename()`.
       "`part` not recognised, use 'order|title|slug|ext'"
       -> parseFilename 'abc', 123
 
-    ]
 
-    tudor.section "Typical 'order' usage"
 
-    tudor.equal [
+
+      tudor.equal
+
+
+
+
+      "Typical 'order' usage"
+
 
       "Get the order from a typical filename"
       3
@@ -48,11 +53,11 @@ Use of the private static function `parseFilename()`.
       '3b-must-all-be-digits'
       -> parseFilename '3b-Must all be digits.md.txt', 'order'
 
-    ]
 
-    tudor.section "Typical 'title' usage"
 
-    tudor.equal [
+
+      "Typical 'title' usage"
+
 
       "Get the title from a typical filename"
       'The Third'
@@ -66,11 +71,11 @@ Use of the private static function `parseFilename()`.
       '3b-Must all be digits'
       -> parseFilename '3b-Must all be digits.md.txt', 'title'
 
-    ]
 
-    tudor.section "Typical 'slug' usage"
 
-    tudor.equal [
+
+      "Typical 'slug' usage"
+
 
       "Get the slug from a typical filename"
       'the-third'
@@ -84,11 +89,11 @@ Use of the private static function `parseFilename()`.
       '3b-must-all-be-digits'
       -> parseFilename '3b-Must all be digits.md.txt', 'slug'
 
-    ]
 
-    tudor.section "Typical 'ext' usage"
 
-    tudor.equal [
+
+      "Typical 'ext' usage"
+
 
       "Get the ext from a typical filename"
       'txt'
@@ -102,11 +107,11 @@ Use of the private static function `parseFilename()`.
       'md.txt'
       -> parseFilename '3b-Must all be digits.md.txt', 'ext'
 
-    ]
 
-    tudor.section "Typical usage with no 'part' argument"
 
-    tudor.equal [
+
+      "Typical usage with no 'part' argument"
+
 
       "Get the order from a typical filename"
       3
@@ -120,21 +125,21 @@ Use of the private static function `parseFilename()`.
       'md.txt'
       -> (parseFilename '3b-Must all be digits.md.txt').ext
 
-    ]
 
-    tudor.section "Edge case orders"
 
-    tudor.equal [
+
+      "Edge case orders"
+
 
       "Filename is all digits"
       123456
       -> parseFilename '123456.txt', 'order'
 
-    ]
 
-    tudor.section "Advanced slugification"
 
-    tudor.equal [
+
+      "Advanced slugification"
+
 
       "Leading, trailing, and multiple whitespace is removed"
       'spaces-and-tabs-before-and-after'

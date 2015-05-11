@@ -128,6 +128,52 @@ Returns an array summarising the current articles. @todo filter/search, paginate
 
 
 
+#### `read()` and `destroy()`
+Both these methods take an `identifier` argument, which can be the article ID, 
+or its index in the `_articles` array. 
+
+`read()` returns a clone of the instance, because returning an actual reference 
+to the instance would allow the caller to modify it in unexpected ways, and 
+possibly leave the apage instance in an invalid state. Also, returning a clone 
+means that `destroy()` is guaranteed to purge the program of all references to 
+the instance, allowing garbage-collection to remove it from system memory. 
+
+      read: (identifier) ->
+        art = ªretrieve @_articles, identifier
+        art.clone()
+
+`destroy()` removes all references to the instance, and runs the article’s 
+`destructor()` method. It then returns a reference to this `apage` instance, to 
+allow chaining, eg `myApage.destroy(0).destroy(0).add({ id:'foo.txt' })`. 
+
+      destroy: (identifier) ->
+        art = ªretrieve @_articles, identifier
+        delete @_articles[art.id]
+        @_articles.splice art.index, 1
+        art.destructor()
+        @ # allow chaining
+
+
+
+
+#### `edit()`
+Amends an article. As with `read()` and `destroy()`, `identifier` can be the 
+article ID or its index in the `@_articles` array. The `amend` argument is an 
+object, where each key must match one of the article’s editable properties, and 
+each value must be a valid replacement value for that key. If any errors occur, 
+the article is left completely untouched, ie `amend` is atomic. Like `add()` 
+and `destroy()`, `edit()` returns a reference to this `apage` instance, to 
+allow chaining. 
+
+      edit: (identifier, amend) ->
+        art = ªretrieve @_articles, identifier
+        if errors = art.edit amend
+          throw new Error 'Invalid `amend`:\n  ' + errors.join '\n  '
+        @ # allow chaining
+
+
+
+
 #### `add()`
 Adds an article to `_articles`. Throws an error if `article` is invalid. 
 
@@ -136,6 +182,7 @@ Adds an article to `_articles`. Throws an error if `article` is invalid.
         instance = new Article article
         if @_articles[instance.id]
           throw new Error "'#{instance.id}' already exists"
+        instance.index = @_articles.length # used by `destroy()` @todo more elegant?
         @_articles.push instance #@todo reorder
         @_articles.sort (a, b) ->
           if a.order > b.order then return 1

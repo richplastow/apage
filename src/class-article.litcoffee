@@ -30,6 +30,10 @@ See `ªpopulate()` for a description of the `rule` format.
           ['path',undefined,'string',/^[a-z0-9][-\/a-z0-9]{0,63}\.[.a-z0-9]+$/i] #@todo looser allowed characters
           ['raw' ,''       ,'string',/^[^\x00-\x08\x0E-\x1F]{0,10000}$/] #@todo better list of valid characters
         ]
+        properties: [
+          ['id'   ,undefined,'string',/^apage_[-_0-9a-z]{1,10}$/]
+          ['order',undefined,'string',/^[-_0-9a-z]{1,10}$/]
+        ]
 
 
 
@@ -146,8 +150,47 @@ The article’s HTML is parsed from the raw markdown using the `marked` library.
 
 
 
+#### Config can override properties
+The properties defined in `_rules.properties` can be overridden by `confg`. 
+
+        if errors = ªpopulate config, @, @_rules.properties, yes #@todo test the `updating` arg
+          throw new Error 'Invalid `config`:\n  ' + errors.join '\n  '
+
+
+
+
 Define public methods
 ---------------------
+
+#### `clone()`
+Returns a copy of the article instance. This is used by `apage.read()`, because 
+returning an actual reference to the article would allow the caller to modify 
+it in unexpected ways. 
+
+      clone: ->
+        ªclone @, ['id', 'path', 'order']
+
+
+
+
+#### `destructor()`
+Xx. @todo description
+
+      destructor: -> #@todo
+
+
+
+
+#### `edit()`
+Modifies instance properties. After the update is complete, `edit()` usually 
+returns `undefined`. However, an attempt to edit properties to an invalid state 
+will fail, and return an array of error messages. 
+
+      edit: (amend) -> #@todo 
+        ªpopulate amend, @, @_rules.properties, yes #@todo test the `updating` arg
+
+
+
 
 #### `config()`
 Gets or sets the current configuration. When setting configuration, `config()` 
@@ -161,7 +204,6 @@ an invalid state will fail, and return an array of error messages.
 
           when 0
             ªclone @_config, @_rules.config
-
 
           when 1
             switch ªtype key
