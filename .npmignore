@@ -1,5 +1,6 @@
-./CNAME
-./doc
-./plugin
-./src
-./test
+CNAME
+doc
+plugin
+src
+test
+!build/plugin

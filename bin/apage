@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 
-/*! apage CLI 0.0.18 //// MIT Licence //// http://apage.richplastow.com/ */
+/*! apage CLI 0.0.19 //// MIT Licence //// http://apage.richplastow.com/ */
 
 !function (root) { 'use strict';
 
 
     //// Define constants.
     var I     = 'apage'
-      , V     = '0.0.18'
+      , V     = '0.0.19'
 
 
     //// Load Node modules and Apage.
