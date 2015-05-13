@@ -209,7 +209,7 @@ Initialize the output array, as well as `mock` and the page pass/fail tallies.
               switch ªtype job
                 when ªF # a mock-modifier
                   try mock = job mock catch e then error = e.message
-                  if error then out.push @formatMockModifierError job, error
+                  if error then sec.push @formatMockModifierError job, error
                 when ªA # assertion in the form `[ runner, name, expect, actual ]`
                   [ runner, heading, expect, actual ] = job # dereference
                   result = runner expect, actual, mock # run the test

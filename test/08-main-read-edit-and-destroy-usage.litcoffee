@@ -1,4 +1,4 @@
-Xx. @todo intro
+Typical use of `read()`, `edit()` and `destroy()` on the `Apage` class. 
 
     tudor.add [
       "08 `apage.read()`, `edit()` and `destroy()` Usage"

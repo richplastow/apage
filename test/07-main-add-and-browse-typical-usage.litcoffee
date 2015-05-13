@@ -1,4 +1,4 @@
-Xx. @todo intro
+Typical use of `add()` and `browse()` on the `Apage` class. 
 
     tudor.add [
       "07 `apage.add()` and `apage.browse()` Typical Usage"

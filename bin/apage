@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 
-/*! apage CLI 0.0.14 //// MIT Licence //// http://apage.richplastow.com/ */
+/*! apage CLI 0.0.15 //// MIT Licence //// http://apage.richplastow.com/ */
 
 !function (root) { 'use strict';
 
 
     //// Define constants.
     var I     = 'apage'
-      , V     = '0.0.14'
+      , V     = '0.0.15'
 
 
     //// Load Node modules and Apage.
@@ -232,6 +232,7 @@
             fs.readFile(input, 'utf8', function (e, data) {
                 if (e) { return exit(2, "Error reading '" + input + "':", e); }
                 articles[i] = { path: input, raw: data };
+                if (input == 'README.md') { articles[i].order = '-1'; } //@todo more elegant ... we are trying to preserve `README.md` being the homepage
                 if (++articleTally === inputs.length) { renderPage(); }
             });
         }(i, inputs[i]) );
