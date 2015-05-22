@@ -1,6 +1,6 @@
 {
   "name": "apage",
-  "version": "0.0.19",
+  "version": "0.0.20",
   "license": "MIT",
   "homepage": "http://apage.richplastow.com/",
   "author": "Rich Plastow <rich@richplastow.com> (http://richplastow.com/)",
@@ -37,6 +37,7 @@
     "nodemon": "latest"
   },
   "scripts": {
+    "hi": "open .; open index.html; open test/run-test.html; subl .",
     "build": "node bin/akaybe-build --plugin",
     "test": "node test/run-test.js",
     "index": "./bin/apage -i README.md doc/*.md -o index.html -t Apage -p \"`cat build/plugin/*.js`\"",

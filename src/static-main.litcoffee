@@ -136,7 +136,7 @@ Render boilerplate Apage JavaScript, and then inject the plugins.
     var i, l, $ref
 
 
-    //// Initialize two arrays which are available to all Apage plugins. 
+    //// Initialize three arrays which are available to all Apage plugins. 
      ,arts      = []
      ,resolvers = []
      ,updaters  = []
@@ -196,6 +196,7 @@ Render boilerplate Apage JavaScript, and then inject the plugins.
 
 
     //// Populate the `arts` array using data from Apage `<ARTICLE>` elements. 
+    //// Then, remove all 'data-apage-*' attributes except 'data-apage-dname'. 
     for (i=0, l=$arts.length; i<l; i++) {
       $ref = $arts[i];
       arts.push({
@@ -207,7 +208,7 @@ Render boilerplate Apage JavaScript, and then inject the plugins.
        ,title: $ref.getAttribute('data-apage-title')
        ,$ref:  $ref
       });
-      unattribute($ref,'data-apage-','opath','dname','order','front','title');
+      unattribute($ref,'data-apage-','opath','order','front','title');
     }
 
 
